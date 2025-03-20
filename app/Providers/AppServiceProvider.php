@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\FirebaseSatpamService;
 use Illuminate\Support\ServiceProvider;
 use Kreait\Firebase\Factory;
 
@@ -25,6 +26,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        app(FirebaseSatpamService::class)->checkSatpamNodeExist();
     }
 }

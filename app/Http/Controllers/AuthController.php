@@ -23,7 +23,7 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        // Validate the input
+
         $request->validate([
             'email' => 'required|email',
             'password' => 'required'
@@ -34,7 +34,7 @@ class AuthController extends Controller
 
         if ($token) {
 
-            $user = $this->firebaseAuth->getUserDetailsFromToken($token);  // You might need to create this method in FirebaseAuthService
+            $user = $this->firebaseAuth->getUserDetailsFromToken($token);  
 
             session(['firebase_token' => $token]);
             session(['firebase_user' => $user]);
@@ -42,26 +42,24 @@ class AuthController extends Controller
             Cookie::queue('firebase_user', json_encode($user), 60, null, null, true, true);
 
 
-            // Redirect to the admin dashboard
+
             return redirect()->route('admin.dashboard');
         }
 
-        // If authentication fails, redirect back with error
+
         return back()->withErrors(['email' => 'Invalid credentials']);
     }
 
     public function logout(Request $request, FirebaseAuthService $firebaseAuth)
     {
-        // (Optional) Revoke user session from Firebase
         $token = $request->cookie('firebase_user');
         if ($token) {
             $user = $firebaseAuth->getUserDetailsFromToken($token);
             if ($user && isset($user['uid'])) {
-                $firebaseAuth->logoutUser($user['uid']); // revoke refresh tokens
+                $firebaseAuth->logoutUser($user['uid']); 
             }
         }
     
-        // Clear the HttpOnly cookie
         return redirect('/login')->withCookie(Cookie::forget('firebase_user'));
     }
 }

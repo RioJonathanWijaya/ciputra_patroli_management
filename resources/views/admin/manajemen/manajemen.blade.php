@@ -1,0 +1,102 @@
+@extends('layouts.app')
+
+@section('content')
+
+
+<div class="relative overflow-auto sm:rounded-lg p-4">
+    <div class="flex flex-col sm:flex-row flex-wrap space-y-4 sm:space-y-0 items-center justify-between mb-10">
+        <h1 class="text-3xl font-bold">Data Manajemen</h1>
+        <a href="{{ route('admin.manajemen.create') }}">
+            <x-button color="secondary">ADD NEW</x-button>
+        </a>
+    </div>
+
+    <x-card class="flex flex-wrap items-center gap-4 mb-10">
+        <div class="flex-1 min-w-[200px]">
+            <label class="block text-sm font-semibold mb-1 text-gray-700">What are you looking for?</label>
+            <x-input name="input" type="text" placeholder="Search for category, name, company, etc" />
+        </div>
+
+        <div class="min-w-[150px]">
+            <label class="block text-sm font-semibold mb-1 text-gray-700">Category</label>
+            <x-select name="kategori" :options="['All' => 'All', 'Category A' => 'Category A', 'Category B' => 'Category B', 'Category C' => 'Category C']" />
+        </div>
+
+        <div class="min-w-[150px]">
+            <label class="block text-sm font-semibold mb-1 text-gray-700">Status</label>
+            <x-select name="kategori" :options="['All' => 'All', 'Category A' => 'Category A', 'Category B' => 'Category B', 'Category C' => 'Category C']" />
+
+        </div>
+
+        <div class="min-w-[150px] mt-5">
+            <x-button>SEARCH</x-button>
+        </div>
+    </x-card>
+
+    <div class="overflow-x-auto bg-white shadow-md rounded-xl">
+    <table class="min-w-full table-auto divide-y divide-gray-200 text-sm text-gray-700">
+    <thead class="bg-[#1C3A6B] text-white">
+        <tr>
+            <th class="px-4 py-3 text-left whitespace-nowrap font-semibold w-10">No</th>
+            <th class="px-4 py-3 text-left whitespace-nowrap font-semibold">NIP</th>
+            <th class="px-4 py-3 text-left whitespace-nowrap font-semibold">Nama Lengkap</th>
+            <th class="px-4 py-3 text-left whitespace-nowrap font-semibold">Email</th>
+            <th class="px-4 py-3 text-left whitespace-nowrap font-semibold">Jabatan</th>
+            <th class="px-4 py-3 text-left whitespace-nowrap font-semibold">No. Telepon</th>
+            <th class="px-4 py-3 text-left whitespace-nowrap font-semibold">Status</th>
+            <th class="px-4 py-3 text-left whitespace-nowrap font-semibold">Aksi</th>
+        </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+        @if($manajemenData)
+            @php $no = 1; @endphp
+            @foreach($manajemenData as $key => $manajemen)
+            <tr class="hover:bg-gray-50 transition-all cursor-pointer manajemen-row" data-url="{{ route('admin.manajemen.detail', $manajemen['manajemen_id']) }}">
+                <td class="px-4 py-3 whitespace-nowrap">{{ $no++ }}</td>
+                <td class="px-4 py-3 whitespace-nowrap">{{ $manajemen['nip'] ?? '-' }}</td>
+                <td class="px-4 py-3 whitespace-nowrap">{{ $manajemen['nama'] ?? '-' }}</td>
+                <td class="px-4 py-3 whitespace-nowrap max-w-[220px] truncate">{{ $manajemen['email'] ?? '-' }}</td>
+                <td class="px-4 py-3 whitespace-nowrap">{{ $manajemen['jabatan'] ?? '-' }}</td>
+                <td class="px-4 py-3 whitespace-nowrap">{{ $manajemen['nomor_telepon'] ?? '-' }}</td>
+                <td class="px-4 py-3 whitespace-nowrap">
+                    @php
+                        $status = $manajemen['status'] ?? '-';
+                        $statusClass = match ($status) {
+                            'Aktif' => 'bg-green-100 text-green-800',
+                            'Cuti' => 'bg-orange-100 text-orange-800',
+                            'Tidak Aktif' => 'bg-red-100 text-red-800',
+                            default => 'bg-gray-100 text-gray-800',
+                        };
+                    @endphp
+                    <span class="px-3 py-1 text-sm font-semibold rounded-full {{ $statusClass }}">
+                        {{ $status }}
+                    </span>
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap">
+                    <a href="{{ route('admin.manajemen.detail', $manajemen['manajemen_id']) }}"
+                        class="text-blue-600 hover:text-blue-800 font-medium transition-all duration-150">
+                        Lihat Detail
+                    </a>
+                </td>
+            </tr>
+            @endforeach
+        @else
+            <tr>
+                <td colspan="10" class="text-center py-4 text-gray-500">Data Manajemen belum tersedia.</td>
+            </tr>
+        @endif
+    </tbody>
+</table>
+
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.manajemen-row').forEach(row => {
+        row.addEventListener('click', () => {
+            const url = row.getAttribute('data-url');
+            window.location.href = url;
+        });
+    });
+</script>
+@endsection

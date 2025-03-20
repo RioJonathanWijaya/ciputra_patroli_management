@@ -4,6 +4,8 @@ namespace App\Services;
 
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\Auth;
+use App\Services\config;
+
 
 class FirebaseAuthService
 {
