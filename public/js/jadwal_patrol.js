@@ -14,6 +14,9 @@ patrolPolyline = null,
 animatedMarker = null;
 
 document.addEventListener("DOMContentLoaded", function() {
+
+
+
         $('.select2').select2({
             placeholder: "Cari dan pilih...",
             width: '100%'
@@ -56,7 +59,11 @@ document.addEventListener("DOMContentLoaded", function() {
                 spinnerIcon.classList.add('hidden');
             });
         });
+
+        
     });
+
+    
 
     function updatePointsDisplay() {
         const list = document.getElementById('pointsList');

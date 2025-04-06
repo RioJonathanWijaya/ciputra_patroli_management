@@ -18,7 +18,17 @@
     <form action="{{ route('admin.jadwal_patroli.store') }}" method="POST" onsubmit="return validateForm()" class="space-y-6">
         @csrf
 
-        <div class="transition duration-300 ease-in-out transform hover:scale-[1.01]">
+        <div class="transition duration-300 ease-in-out transform">
+            <label for="nama" class="block text-sm font-medium text-gray-700 mb-2">Nama Jadwal Patroli</label>
+            <input for="nama" name="nama" type="text" class="w-full rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-3">
+        </div>
+
+        <div class="transition duration-300 ease-in-out transform">
+            <label for="deskripsi" class="block text-sm font-medium text-gray-700 mb-2">Deskripsi Jadwal Patroli</label>
+            <textarea for="deskripsi" name="deskripsi" type="text" class="w-full rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-3"></textarea>
+        </div>
+
+        <div class="transition duration-300 ease-in-out transform">
             <label for="lokasi" class="block text-sm font-medium text-gray-700 mb-2">Lokasi</label>
             <select id="lokasi" name="lokasi" class="select2 w-full rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-3">
                 <option value="">Pilih Lokasi</option>
@@ -28,9 +38,9 @@
             </select>
         </div>
 
-        <div class="transition duration-300 ease-in-out transform hover:scale-[1.01]">
+        <div id="satpam_pagi_wrapper" class="transition duration-300 ease-in-out transform">
             <label for="satpam_shift_pagi" class="block text-sm font-medium text-gray-700 mb-2">Satpam Shift Pagi</label>
-            <select id="satpam_shift_pagi" name="satpam_shift_pagi" class="select2 w-full rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-3">
+            <select id="satpam_shift_pagi" name="satpam_shift_pagi" class="select2 w-full rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-3" >
                 <option value="">Pilih Satpam</option>
                 @foreach($satpamPagi as $id => $satpam)
                 <option value="{{ $id }}">{{ $satpam['nip'] }} - {{ $satpam['nama'] }}</option>
@@ -38,7 +48,7 @@
             </select>
         </div>
 
-        <div class="transition duration-300 ease-in-out transform hover:scale-[1.01]">
+        <div id="satpam_malam_wrapper" class="transition duration-300 ease-in-out transform">
             <label for="satpam_shift_malam" class="block text-sm font-medium text-gray-700 mb-2">Satpam Shift Malam</label>
             <select id="satpam_shift_malam" name="satpam_shift_malam" class="select2 w-full rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-3">
                 <option value="">Pilih Satpam</option>
@@ -48,7 +58,7 @@
             </select>
         </div>
 
-        <div class="transition duration-300 ease-in-out transform hover:scale-[1.01]">
+        <div class="transition duration-300 ease-in-out transform">
             <label class="block text-sm font-medium text-gray-700 mb-2">Titik Patroli</label>
             <div id="map" class="h-[300px] w-full rounded-2xl border border-gray-300 shadow-inner animate-fade-in"></div>
             <button type="button" id="addPoint" class="mt-3 inline-flex items-center bg-blue-600 hover:bg-blue-700 transition-all duration-300 transition-opacity text-white text-sm px-5 py-2 rounded-xl shadow-md">
@@ -66,7 +76,7 @@
             </div>
         </div>
 
-        <div class="transition duration-300 ease-in-out transform hover:scale-[1.01]">
+        <div class="transition duration-300 ease-in-out transform">
             <label for="interval_patroli" class="block text-sm font-medium text-gray-700 mb-2">Interval Patroli (Setiap ... Jam)</label>
             <input type="number" name="interval_patroli" id="interval_patroli" min="1" class="w-full rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-3" placeholder="Contoh: 2">
             <small class="text-gray-500">Masukkan berapa jam sekali satpam melakukan patroli (misal: 2 berarti setiap 2 jam sekali).</small>

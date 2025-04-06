@@ -58,13 +58,19 @@
                 <td class="px-4 py-3 whitespace-nowrap">{{ $satpam['nip'] ?? '-' }}</td>
                 <td class="px-4 py-3 whitespace-nowrap">{{ $satpam['nama'] ?? '-' }}</td>
                 <td class="px-4 py-3 whitespace-nowrap max-w-[220px] truncate">{{ $satpam['email'] ?? '-' }}</td>
-                <td class="px-4 py-3 whitespace-nowrap">{{ $satpam['shift'] ?? '-' }}</td>
-                <td class="px-4 py-3 whitespace-nowrap">{{ $satpam['jabatan'] ?? '-' }}</td>
+                <td class="px-4 py-3 whitespace-nowrap">{{ $satpam['shift'] == 1 ? 'Malam' : 'Pagi' }}</td>
+                <td class="px-4 py-3 whitespace-nowrap">{{ $satpam['jabatan'] == 1 ? 'Kepala Shift' : 'Satpam' }}</td>
                 <td class="px-4 py-3 whitespace-nowrap">{{ $satpam['nomor_telepon'] ?? '-' }}</td>
                 <td class="px-4 py-3 whitespace-nowrap">{{ $satpam['lokasi'] ?? '-' }}</td>
                 <td class="px-4 py-3 whitespace-nowrap">
                     @php
-                        $status = $satpam['status'] ?? '-';
+                        if($satpam['status'] == 0){
+                            $status = 'Aktif';
+                        } else if ($satpam['status'] == 1){
+                            $status = 'Cuti';
+                        } else {
+                            $status = 'Tidak Aktif';
+                        };
                         $statusClass = match ($status) {
                             'Aktif' => 'bg-green-100 text-green-800',
                             'Cuti' => 'bg-orange-100 text-orange-800',

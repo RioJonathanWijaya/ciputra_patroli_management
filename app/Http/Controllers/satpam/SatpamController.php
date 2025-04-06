@@ -6,16 +6,19 @@ use App\Http\Controllers\Controller;
 use Kreait\Firebase\Contract\Database;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use App\Services\FirebaseAuthService;
 
 class SatpamController extends Controller
 {
+    protected $firebaseAuth;
     protected $database;
     protected $satpamRef;
     protected $lokasiRef;
     
-    public function __construct(Database $database)
+    public function __construct(Database $database, FirebaseAuthService $firebaseAuth)
     {
         $this->database = $database;
+        $this->firebaseAuth = $firebaseAuth;
         $this->satpamRef = $this->database->getReference('satpam');
         $this->lokasiRef = $this->database->getReference('lokasi');
     }
@@ -56,10 +59,12 @@ class SatpamController extends Controller
             'pendidikan_terakhir' => 'required|string',
             'photo' => 'nullable|image|max:2048',
         ]);
-    
-        $ref = app('firebase.database')->getReference('satpam');
+
+        $ref = $this->satpamRef;
         $newSatpamRef = $ref->push();
         $satpam_id = $newSatpamRef->getKey();
+
+        $firebaseUser = $this->firebaseAuth->registerUser($validated['email'], $validated['password'], $satpam_id);
     
         $fotoProfileUrl = null;
         if ($request->hasFile('photo')) {
@@ -72,29 +77,28 @@ class SatpamController extends Controller
         $satpamData = [
             'satpam_id' => $satpam_id,
             'nama' => $validated['nama'],
-            'nip' => $validated['nip'],
-            'shift' => $validated['shift'],
+            'nip' => strtoupper($validated['nip']),
+            'shift' => (int) $validated['shift'] ?? 0,
             'lokasi_id' => 0,
-            'status' => $validated['status'] ?? 'Aktif',
-            'jabatan' => $validated['jabatan'],
-            'foto_profile' => $fotoProfileUrl,
+            'status' => $validated['status'] ?? 0,
+            'jabatan' => (int) $validated['jabatan'] ?? 0,
+            'foto_profile' => $fotoProfileUrl ?? '',
             'email' => $validated['email'],
             'password' => bcrypt($validated['password']),
-            'supervisor_id' => $validated['supervisor'] ?? 0,
-            'penugasan_id' => 0,
+            'supervisor_id' => $validated['supervisor'] ?? '',
+            'penugasan_id' => '',
             'nomor_telepon' => $validated['nomor_telepon'],
             'alamat' => $validated['alamat'],
-            'jenis_kelamin' => $validated['jenis_kelamin'] ?? '',
+            'jenis_kelamin' => (int) $validated['jenis_kelamin'] ?? 0,
             'tanggal_lahir' => $validated['tanggal_lahir'] ?? '',
             'tempat_lahir' => $validated['tempat_lahir'] ?? '',
             'tanggal_bergabung' => $validated['tanggal_bergabung'] ?? '',
-            'status_pernikahan' => $validated['status_pernikahan'] ?? '',
+            'status_pernikahan' => (int) $validated['status_pernikahan'] ?? 0,
             'pendidikan_terakhir' => $validated['pendidikan_terakhir'] ?? '',
-            'satpam_id' => $satpam_id
         ];
     
         $newSatpamRef->set($satpamData); 
-    
+        
     
         return redirect()->back()->with('success', 'Data Satpam berhasil ditambahkan!');
     } catch (\Exception $e) {
@@ -132,13 +136,12 @@ public function create() {
     $filteredKepalaSatpam = [];
 
         foreach($kepalaSatpamData as $key => $kepalaSatpam){
-            if(isset($kepalaSatpam['jabatan']) && $kepalaSatpam['jabatan'] == 'Kepala Shift') {
+            if(isset($kepalaSatpam['jabatan']) && $kepalaSatpam['jabatan'] == 1) {
                 $filteredKepalaSatpam[] = $kepalaSatpam;
             }
         }
 
     return view('admin.satpam.create', ['kepalaSatpamData' => $filteredKepalaSatpam]);
 }
-
 
 }

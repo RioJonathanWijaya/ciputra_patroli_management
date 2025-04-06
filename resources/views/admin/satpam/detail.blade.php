@@ -2,24 +2,33 @@
 
 @section('content')
 <div class="space-y-6">
-<div class="bg-white rounded-2xl shadow p-6 flex items-center justify-between">
-    <div class="flex items-center gap-4 w-full">
-        <div class="flex items-center gap-4 flex-1">
-            <img src="https://via.placeholder.com/80" class="rounded-full w-20 h-20 object-cover" alt="Satpam Photo">
-            <div>
-                <h2 class="text-xl font-bold">{{ $satpam['nama'] }}</h2>
-                <p class="text-sm text-gray-500">{{ $satpam['jabatan'] }} | {{ $satpam['nama_lokasi'] }}</p>
+    <div class="bg-white rounded-2xl shadow p-6 flex items-center justify-between">
+        <div class="flex items-center gap-4 w-full">
+            <div class="flex items-center gap-4 flex-1">
+                <img src="https://via.placeholder.com/80" class="rounded-full w-20 h-20 object-cover" alt="Satpam Photo">
+                <div>
+                    <h2 class="text-xl font-bold">{{ $satpam['nama'] }}</h2>
+                    <p class="text-sm text-gray-500">{{ $satpam['jabatan'] }} |
+                        @php
+                        $lokasiBelumAda = !isset($satpam['nama_lokasi']) || $satpam['nama_lokasi'] === '-' || empty($satpam['nama_lokasi'])
+                        @endphp
+                        @if($lokasiBelumAda)
+                            <span class="text-red-600">Lokasi jaga belum ditetapkan</span>
+                        @else
+                            {{ $satpam['nama_lokasi'] }}
+                        @endif
+                    </p>
+                </div>
+            </div>
+
+            <div class="h-16 w-px bg-gray-300 mx-6"></div>
+
+            <div class="text-sm text-right text-gray-500 whitespace-nowrap">
+                <p class="font-medium text-gray-600">Tanggal Bergabung</p>
+                <p class="text-gray-900">{{ $satpam['tanggal_bergabung'] ?? '-' }}</p>
             </div>
         </div>
-
-        <div class="h-16 w-px bg-gray-300 mx-6"></div>
-
-        <div class="text-sm text-right text-gray-500 whitespace-nowrap">
-            <p class="font-medium text-gray-600">Tanggal Bergabung</p>
-            <p class="text-gray-900">{{ $satpam['tanggal_bergabung'] ?? '-' }}</p>
-        </div>
     </div>
-</div>
 
     <div class="min-h-screen flex flex-col bg-gray-100 p-6">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

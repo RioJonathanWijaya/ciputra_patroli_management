@@ -46,12 +46,11 @@
     </form>
 </div>
 
-<!-- Toast -->
+
 <div id="validationToast" class="fixed top-6 right-6 bg-red-600 text-white px-4 py-3 rounded-xl shadow-xl hidden z-50">
     Harap isi semua data wajib terlebih dahulu!
 </div>
 
-<!-- Modal Konfirmasi -->
 <div id="confirmationModal" class="fixed inset-0 bg-black/50 z-40 hidden flex items-center justify-center">
     <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4 animate-fade-in">
         <h2 class="text-xl font-bold text-gray-800">Konfirmasi</h2>

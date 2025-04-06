@@ -13,8 +13,8 @@ class DashboardController extends Controller
         $firebaseUser = $request->cookie('firebase_user');
 
         if ($firebaseUser) {
-            $firebaseUserData = json_decode($firebaseUser, true); // Convert the JSON string to an array
-            return view('admin.dashboard', compact('firebaseUserData'));  // Pass the array as a variable
+            $firebaseUserData = json_decode($firebaseUser, true); 
+            return view('admin.dashboard', compact('firebaseUserData')); 
         }
 
         return redirect('/login');

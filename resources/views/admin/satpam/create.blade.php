@@ -33,15 +33,12 @@
 @endif
 
 <div class="max-w-7xl mx-auto p-6 space-y-6">
-    {{-- Page Title --}}
     <div class="text-3xl font-bold text-[#1C3A6B]">Tambah Satpam</div>
 
     <form id="satpamForm" action="{{ route('admin.satpam.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
-        {{-- Cards Grid --}}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {{-- Upload Foto --}}
             <div class="col-span-1 bg-white shadow-lg border border-[#1C3A6B]/20 rounded-2xl p-5 animate-fade-in">
                 <h3 class="text-xl font-semibold text-[#1C3A6B] mb-4">Foto Profil</h3>
                 <div class="flex flex-col items-center">
@@ -58,7 +55,6 @@
                 </div>
             </div>
 
-            {{-- Informasi Pribadi --}}
             <div class="col-span-2 bg-white shadow-lg border border-[#1C3A6B]/20 rounded-2xl p-6 animate-fade-in space-y-6">
                 <h3 class="text-xl font-semibold text-[#1C3A6B] border-b border-gray-200 pb-2">Informasi Pribadi</h3>
                 <div class="space-y-4">
@@ -87,15 +83,15 @@
                         <div>
                             <label class="text-sm font-medium text-[#1C3A6B]">Jenis Kelamin</label>
                             <select name="jenis_kelamin" class="w-full border border-gray-300 p-2 rounded mt-1 focus:ring-2 focus:ring-[#0D7C5D]" required>
-                                <option>Laki-laki</option>
-                                <option>Perempuan</option>
+                                <option value="0">Laki-laki</option>
+                                <option value="1">Perempuan</option>
                             </select>
                         </div>
                         <div>
                             <label class="text-sm font-medium text-[#1C3A6B]">Status Pernikahan</label>
                             <select name="status_pernikahan" class="w-full border border-gray-300 p-2 rounded mt-1 focus:ring-2 focus:ring-[#0D7C5D]" required>
-                                <option>Menikah</option>
-                                <option>Belum Menikah</option>
+                                <option value ="0">Menikah</option>
+                                <option value ="1">Belum Menikah</option>
                             </select>
                         </div>
                     </div>
@@ -123,15 +119,15 @@
                     <div>
                         <label class="text-sm font-medium text-[#1C3A6B]">Jabatan</label>
                         <select name="jabatan" id="jabatanSelect" class="w-full border border-gray-300 p-2 rounded mt-1 focus:ring-2 focus:ring-[#0D7C5D]" required>
-                            <option>Satpam</option>
-                            <option>Kepala Shift</option>
+                            <option value="0">Satpam</option>
+                            <option value="1">Kepala Shift</option>
                         </select>
                     </div>
                     <div>
                         <label class="text-sm font-medium text-[#1C3A6B]">Shift</label>
                         <select name="shift" class="w-full border border-gray-300 p-2 rounded mt-1 focus:ring-2 focus:ring-[#0D7C5D]" required>
-                            <option value="Pagi">Pagi</option>
-                            <option value="Malam">Malam</option>
+                            <option value="0">Pagi</option>
+                            <option value="1">Malam</option>
                         </select>
                     </div>
                     <div id="supervisorField" class="transition-all duration-500 ease-in-out overflow-hidden max-h-[200px] opacity-100">
@@ -175,7 +171,6 @@
     </div>
 </div>
 
-{{-- Scripts --}}
 <script>
             const $jabatanSelect = $('#jabatanSelect');
         const $supervisorField = $('#supervisorField');

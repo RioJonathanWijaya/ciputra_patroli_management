@@ -5,16 +5,19 @@ namespace App\Http\Controllers\manajemen;
 use App\Http\Controllers\Controller;
 use Kreait\Firebase\Contract\Database;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
+use App\Services\FirebaseAuthService;
+
 
 class ManajemenController extends Controller
 {
+    protected $firebaseAuth;
     protected $database;
     protected $manajemenRef;
     
-    public function __construct(Database $database)
+    public function __construct(Database $database, FirebaseAuthService $firebaseAuth)
     {
         $this->database = $database;
+        $this->firebaseAuth = $firebaseAuth;
         $this->manajemenRef = $this->database->getReference('manajemen');
     }
 
@@ -85,7 +88,8 @@ class ManajemenController extends Controller
         ];
     
         $newmanajemenRef->set($manajemenData); 
-    
+        
+        $firebaseUser = $this->firebaseAuth->registerUserManajemen($validated['email'], $validated['password'], $manajemen_id);
     
         return redirect()->back()->with('success', 'Data Manajemen berhasil ditambahkan!');
     } catch (\Exception $e) {
@@ -107,6 +111,9 @@ public function detail($id)
 public function create() {
     return view('admin.manajemen.create');
 }
+
+
+
 
 
 }

@@ -9,7 +9,6 @@
         </a>
     </div>
 
-    {{-- Toast Notification --}}
     @if(session('success') || session('error'))
     <div id="toast" class="fixed top-5 right-5 text-white font-semibold px-6 py-3 rounded-lg shadow-lg z-50
             {{ session('success') ? 'bg-green-500' : 'bg-red-500' }}">
@@ -24,55 +23,65 @@
     @endif
 
     <div class="overflow-x-auto bg-white shadow-md rounded-xl">
-    <table class="min-w-full table-auto divide-y divide-gray-200 text-sm text-gray-700">
-    <thead class="bg-[#1C3A6B] text-white">
-        <tr>
-            <th class="px-4 py-3 text-left font-semibold whitespace-nowrap w-10">No</th>
-            <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">Lokasi Cluster</th>
-            <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">Satpam Shift Pagi</th>
-            <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">Satpam Shift Siang</th>
-            <th class="px-4 py-3 text-left font-semibold whitespace-nowrap w-32">Aksi</th>
-        </tr>
-    </thead>
-    <tbody class="divide-y divide-gray-100">
-        @forelse($jadwalData as $index => $jadwal)
-        <tr class="hover:bg-gray-50 transition-all cursor-pointer"
-            data-lokasi="{{ $jadwal['nama_lokasi'] }}"
-            data-shiftpagi="{{ $jadwal['nama_satpam_pagi'] }}"
-            data-shiftsiang="{{ $jadwal['nama_satpam_malam'] }}"
-            onclick="openDetailModal(this)">
-            <td class="px-4 py-3 whitespace-nowrap">{{ $index + 1 }}</td>
-            <td class="px-4 py-3 whitespace-nowrap">{{ $jadwal['nama_lokasi'] }}</td>
-            <td class="px-4 py-3 whitespace-nowrap">{{ $jadwal['nama_satpam_pagi'] }}</td>
-            <td class="px-4 py-3 whitespace-nowrap">{{ $jadwal['nama_satpam_malam'] }}</td>
-            <td class="px-4 py-3 whitespace-nowrap" onclick="event.stopPropagation()">
-                <div class="flex items-center gap-3">
-                    <a href="{{ route('admin.jadwal_patroli.edit', $jadwal['id']) }}"
-                        class="text-blue-600 hover:text-blue-800 transition-all duration-200 transform hover:scale-110 relative group">
-                        <i class="fa-solid fa-pen-to-square text-lg"></i>
-                        <span class="absolute -top-7 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
-                            Edit
-                        </span>
-                    </a>
-                    <button type="button"
-                        data-delete-url="{{ route('admin.jadwal_patroli.destroy', $jadwal['id']) }}"
-                        onclick="showDeleteModalFromElement(this)"
-                        class="text-red-600 hover:text-red-800 transition-all duration-200 transform hover:scale-110 relative group">
-                        <i class="fa-solid fa-trash text-lg"></i>
-                        <span class="absolute -top-7 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
-                            Delete
-                        </span>
-                    </button>
-                </div>
-            </td>
-        </tr>
-        @empty
-        <tr>
-            <td colspan="5" class="text-center py-4 text-gray-500">Data jadwal belum tersedia.</td>
-        </tr>
-        @endforelse
-    </tbody>
-</table>
+        <table class="min-w-full table-auto divide-y divide-gray-200 text-sm text-gray-700">
+            <thead class="bg-[#1C3A6B] text-white">
+                <tr>
+                    <th class="px-4 py-3 text-left font-semibold whitespace-nowrap w-10">No</th>
+                    <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">Lokasi Cluster</th>
+                    <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">Satpam Shift Pagi</th>
+                    <th class="px-4 py-3 text-left font-semibold whitespace-nowrap">Satpam Shift Siang</th>
+                    <th class="px-4 py-3 text-left font-semibold whitespace-nowrap w-32">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                @forelse($jadwalData as $index => $jadwal)
+                @php
+                $satpamPagi = collect($jadwal['satpam_list'] ?? [])->firstWhere('shift', 'pagi');
+                $satpamMalam = collect($jadwal['satpam_list'] ?? [])->firstWhere('shift', 'malam');
+                @endphp
+
+                <tr class="hover:bg-gray-50 transition-all cursor-pointer"
+                    data-lokasi="{{ $jadwal['nama_lokasi'] }}"
+                    data-shiftpagi=" {{ $satpamPagi['nama']}}"
+                    data-shiftmalam=" {{ $satpamMalam['nama']}}"
+                    onclick="openDetailModal(this)">
+                    <td class="px-4 py-3 whitespace-nowrap">{{ $index + 1 }}</td>
+                    <td class="px-4 py-3 whitespace-nowrap">{{ $jadwal['nama_lokasi'] }}</td>
+                    <td class="px-4 py-3 whitespace-nowrap">
+
+                        {{ $satpamPagi['nama'] ?? '-' }}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap">
+                        {{ $satpamMalam['nama'] ?? '-' }}
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap" onclick="event.stopPropagation()">
+                        <div class="flex items-center gap-3">
+                            <a href="{{ route('admin.jadwal_patroli.edit', $jadwal['id']) }}"
+                                class="text-blue-600 hover:text-blue-800 transition-all duration-200 transform hover:scale-110 relative group">
+                                <i class="fa-solid fa-pen-to-square text-lg"></i>
+                                <span class="absolute -top-7 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
+                                    Edit
+                                </span>
+                            </a>
+                            <button type="button"
+                                data-delete-url="{{ route('admin.jadwal_patroli.destroy', $jadwal['id']) }}"
+                                onclick="showDeleteModalFromElement(this)"
+                                class="text-red-600 hover:text-red-800 transition-all duration-200 transform hover:scale-110 relative group">
+                                <i class="fa-solid fa-trash text-lg"></i>
+                                <span class="absolute -top-7 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
+                                    Delete
+                                </span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="5" class="text-center py-4 text-gray-500">Data jadwal belum tersedia.</td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
 
     </div>
 

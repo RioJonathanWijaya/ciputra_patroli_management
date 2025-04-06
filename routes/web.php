@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\jadwal\JadwalController;
+use App\Http\Controllers\kejadian\KejadianController;
 use App\Http\Controllers\satpam\SatpamController;
 use App\Http\Controllers\lokasi\LokasiController;
 use App\Http\Controllers\manajemen\ManajemenController;
@@ -32,6 +33,7 @@ Route::middleware([\App\Http\Middleware\FirebaseAuthMiddleware::class])->group(f
     Route::get('/admin/jadwal_patroli/jadwal_patroli', [JadwalController::class, 'jadwal'])->name('admin.jadwal_patroli.jadwal_patroli');
     Route::get('/admin/kepala_satpam/kepala_satpam', [KepalaSatpamController::class, 'kepala_satpam'])->name('admin.kepala_satpam.kepala_satpam');
     Route::get('/admin/manajemen/manajemen', [ManajemenController::class, 'manajemen'])->name('admin.manajemen.manajemen');
+    Route::get('/admin/kejadian/kejadian', [KejadianController::class, 'view'])->name('admin.kejadian.kejadian');
 
     //Satpam Detail
     Route::get('admin/satpam/{id}/detail', [SatpamController::class, 'detail'])->name('admin.satpam.detail');
@@ -57,4 +59,9 @@ Route::middleware([\App\Http\Middleware\FirebaseAuthMiddleware::class])->group(f
     Route::post('admin/jadwal_patroli/store', [JadwalController::class, 'store'])->name('admin.jadwal_patroli.store');
     Route::get('admin/jadwal_patroli/{id}/edit', [JadwalController::class, 'edit'])->name('admin.jadwal_patroli.edit');
     Route::delete('admin/jadwal_patroli/{id}', [JadwalController::class, 'destroy'])->name('admin.jadwal_patroli.destroy');
+
+    // Kejadian
+    Route::get('admin/kejadian/index', [KejadianController::class, 'index'])->name('admin.kejadian.index');
+    Route::get('/admin/kejadian/{id}', [KejadianController::class, 'show'])->name('admin.kejadian.show');
+    Route::post('/admin/kejadian/tindakan/store', [KejadianController::class, 'storeTindakan'])->name('admin.kejadian.saveTindakan');
 });
