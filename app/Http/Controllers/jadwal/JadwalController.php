@@ -117,6 +117,7 @@ class JadwalController extends Controller
             'lokasi' => $request->lokasi,
             'titik_patrol' => $titikPatrolArray,
             'interval_patroli' => $interval,
+            'created_at' => now()->toDateTimeString(),
         ]);
         $jadwalId = $jadwalRef->getKey();
     

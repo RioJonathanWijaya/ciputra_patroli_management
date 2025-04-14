@@ -12,15 +12,17 @@ class LokasiController extends Controller
 
     protected $database;
     protected $tableName = 'lokasi';
+    protected $lokasiRef;
 
     public function __construct(Database $database)
     {
         $this->database = $database;
+        $this->lokasiRef = $this->database->getReference('lokasi');
     }
     public function lokasi()
     {
-        $lokasiRef = $this->database->getReference('lokasi');
-        $lokasiData = $lokasiRef->getValue();
+        
+        $lokasiData = $this->lokasiRef->getValue();
 
         $result = [];
 
@@ -69,7 +71,6 @@ class LokasiController extends Controller
         $uuid = Str::uuid()->toString();
 
         $data = [
-            'id' => $uuid,
             'nama_lokasi' => $request->nama_lokasi,
             'alamat' => $request->alamat,
             'deskripsi' => $request->deskripsi,
@@ -78,9 +79,7 @@ class LokasiController extends Controller
             'created_at' => now()->toDateTimeString(),
         ];
 
-        $this->database
-            ->getReference($this->tableName . '/' . $uuid)
-            ->set($data);
+        $this->lokasiRef->set($data);
 
         return redirect()->route('admin.lokasi.lokasi')->with('success', 'Lokasi berhasil disimpan ke Firebase!');
     }

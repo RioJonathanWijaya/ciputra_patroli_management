@@ -58,7 +58,7 @@ class KejadianController extends Controller
                 'foto_bukti_kejadian' => $fotos,
                 'tindakan' => $tindakan,
             ];
-            return new KejadianResource((object)$kejadianData);
+            return  response()->json($kejadianData);
     
         } catch (\Exception $e) {
             return response()->json([
@@ -130,6 +130,7 @@ class KejadianController extends Controller
     $request->validate([
         'kejadian_id' => 'required|string',
         'tindakan' => 'required|string',
+        'status' => 'nullable|integer|0,1,2'
     ]);
 
     $user = session('firebase_user');
@@ -142,6 +143,7 @@ class KejadianController extends Controller
     $kejadianId = $request->input('kejadian_id');
     $tindakanText = $request->input('tindakan');
     $waktuTindakan = Carbon::now()->toDateTimeString();
+    $status = $request->input('status');
 
     $data = [
         'tindakan_id' => $tindakanId,
@@ -149,7 +151,22 @@ class KejadianController extends Controller
         'kejadian_id' => $kejadianId,
         'tindakan' => $tindakanText,
         'waktu_tindakan' => $waktuTindakan,
+        'created_at' => now()->toDateTimeString(),
     ];
+
+    $statusLabels = [
+        0 => 'Baru',
+        1 => 'Proses', 
+        2 => 'Selesai'
+    ];
+
+    $selectedStatus = $statusLabels[$status] ?? 'Baru';
+
+    //Change status in kejadian
+    $this->kejadianRef->getChild($kejadianId)->update([
+        'status' => $selectedStatus,
+        'waktu_selesai' => now()->toDateTimeString()
+    ]);
 
     try {
         $this->database->getReference("tindakan/{$tindakanId}")->set($data);
@@ -157,6 +174,37 @@ class KejadianController extends Controller
         return redirect()->route('admin.kejadian.kejadian')->with('success', 'Tindakan berhasil disimpan.');
     } catch (\Exception $e) {
         return redirect()->back()->with('error', 'Gagal menyimpan tindakan: ' . $e->getMessage());
+    }
+}
+
+public function delete($id)
+{
+    try {
+        $kejadian = $this->kejadianRef->getChild($id)->getValue();
+
+        if (!$kejadian) {
+            return response()->json([
+                'error' => 'Not Found',
+                'message' => 'Kejadian not found.'
+            ], 404);
+        }
+
+        $this->kejadianRef->getChild($id)->remove();
+
+        $tindakanRef = $this->database->getReference('tindakan');
+        $allTindakan = $tindakanRef->getValue();
+
+        if ($allTindakan) {
+            foreach ($allTindakan as $key => $tindakan) {
+                if (isset($tindakan['kejadian_id']) && $tindakan['kejadian_id'] === $id) {
+                    $tindakanRef->getChild($key)->remove();
+                }
+            }
+        }
+
+return redirect()->route('admin.kejadian.kejadian')->with('success', 'Kejadian berhasil dihapus.');
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', 'Gagal menghapus kejadian: ' . $e->getMessage());
     }
 }
 

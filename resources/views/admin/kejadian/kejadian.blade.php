@@ -34,39 +34,30 @@
     </div>
 
     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div class="px-4 py-3 bg-white border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            <div class="relative w-full sm:w-64">
-                <input type="text" placeholder="Cari laporan..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-            </div>
-            <div class="flex items-center gap-2">
-                <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Tambah Laporan
-                </button>
-                <button class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                    </svg>
-                </button>
-            </div>
+    <x-filter-search
+            searchPlaceholder="Cari laporan..."
+            :filterOptions="[
+                'all' => 'Semua Status',
+                'baru' => 'Status: Baru',
+                'proses' => 'Status: Proses',
+                'selesai' => 'Status: Selesai'
+            ]"
+            filterLabel="Filter Status"
+            filterButton="true"
+        />
         </div>
 
         <div class="overflow-x-auto bg-white shadow-md rounded-xl">
             <table class="min-w-full table-auto divide-y divide-gray-200 text-sm text-gray-700">
                 <thead class="bg-[#1C3A6B] text-white">
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">No</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Nama Kejadian</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Tanggal</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Lokasi</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Tipe</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Waktu Laporan</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Status</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider" data-sort="no">No</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider" data-sort="nama">Nama Kejadian</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider" data-sort="tanggal">Tanggal</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider" data-sort="lokasi">Lokasi</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider" data-sort="tipe">Tipe</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider" data-sort="waktu">Waktu Laporan</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider" data-sort="status">Status</th>
                         <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-white uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
@@ -233,6 +224,8 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script>
+   document.addEventListener("DOMContentLoaded", function() {
+    // Initialize Firebase
     const firebaseConfig = {
         apiKey: "{{ config('services.firebase.client.api_key') }}",
         authDomain: "{{ config('services.firebase.client.auth_domain') }}",
@@ -245,35 +238,55 @@
 
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
-
     const renderedIds = new Set();
 
-    document.addEventListener("DOMContentLoaded", function() {
-        fetchKejadianData();
-        listenForRealtimeUpdates();
+    let currentFilter = 'all';
+    let currentSearch = '';
 
-        const modal = document.getElementById('detailModal');
-        const modalContent = document.getElementById('modalContent');
-        const deleteModal = document.getElementById('deleteModal');
-        const deleteModalContent = document.getElementById('deleteModalContent');
+    const searchInput = document.querySelector('.search-input');
+    const filterSelect = document.querySelector('.filter-select');
+    const kejadianBody = document.getElementById("kejadian-body");
 
-        document.getElementById('closeDetailModal').addEventListener('click', () => hideModal(modal, modalContent));
-        document.getElementById('closeDetailModalBtn').addEventListener('click', () => hideModal(modal, modalContent));
+    fetchKejadianData();
+    listenForRealtimeUpdates();
+    setupEventListeners();
 
-        window.showModal = function() {
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modalContent.classList.remove('scale-95', 'opacity-0');
-                modalContent.classList.add('scale-100', 'opacity-100');
-            }, 10);
+    function setupEventListeners() {
+        searchInput.addEventListener('input', debounce(function() {
+            currentSearch = this.value.toLowerCase();
+            filterKejadian();
+        }, 300));
+
+        filterSelect.addEventListener('change', function() {
+            currentFilter = this.value;
+            filterKejadian();
+        });
+    }
+
+    function debounce(func, wait) {
+        let timeout;
+        return function() {
+            const context = this, args = arguments;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(context, args), wait);
         };
+    }
 
-        window.hideModal = function(modal, content) {
-            content.classList.remove('scale-100', 'opacity-100');
-            content.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => modal.classList.add('hidden'), 300);
-        };
-});
+    function filterKejadian() {
+        const rows = kejadianBody.querySelectorAll('tr');
+        
+        rows.forEach(row => {
+            const status = row.getAttribute('data-status').toLowerCase();
+            const rowText = row.textContent.toLowerCase();
+            
+            const filterMatch = currentFilter === 'all' || status === currentFilter;
+            
+            const searchMatch = currentSearch === '' || 
+                rowText.includes(currentSearch);
+            
+            row.style.display = (filterMatch && searchMatch) ? '' : 'none';
+        });
+    }
 
     function fetchKejadianData() {
         fetch("{{ route('admin.kejadian.index') }}")
@@ -326,11 +339,12 @@
     }
 
     function addKejadianToTable(kejadian, number = null) {
-        const tableBody = document.getElementById("kejadian-body");
+        const rowNumber = number ?? kejadianBody.children.length + 1;
+        const status = kejadian.status ? kejadian.status.toLowerCase() : '';
+
         const newRow = document.createElement("tr");
         newRow.className = "hover:bg-gray-50 transition";
-
-        const rowNumber = number ?? tableBody.children.length + 1;
+        newRow.setAttribute('data-status', status);
 
         newRow.innerHTML = `
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${rowNumber}</td>
@@ -378,8 +392,10 @@
             </td>
         `;
 
-        tableBody.appendChild(newRow);
+        kejadianBody.appendChild(newRow);
+        filterKejadian();
     }
+   });
 
     function getBadgeClass(tipe) {
         if (!tipe || typeof tipe !== "string") return "bg-gray-100 text-gray-800";
@@ -439,12 +455,15 @@
             showModal();
 
             const response = await fetch(`/admin/kejadian/${id}`);
+            console.log(response);
 
             if (!response.ok) {
                 throw new Error('Gagal memuat data kejadian');
             }
 
             const kejadianData = await response.json();
+
+            
 
             modalContent.innerHTML = `
             <div class="p-6">
@@ -577,9 +596,9 @@
                         Progress Tindakan
                     </h3>
                     ${
-                        kejadianData.data.tindakan && kejadianData.data.tindakan.length > 0
+                        kejadianData.tindakan && kejadianData.tindakan.length > 0
                         ? `<div class="space-y-4">
-                            ${kejadianData.data.tindakan.map(tindakan => `
+                            ${kejadianData.tindakan.map(tindakan => `
                                 <div class="flex gap-3">
                                     <div class="flex flex-col items-center">
                                         <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
@@ -669,7 +688,7 @@ document.getElementById('closeErrorModal').addEventListener('click', () => {
 
     function showDeleteModal(id) {
         const form = document.getElementById('deleteForm');
-        form.setAttribute('action', `/admin/kejadian/${id}`);
+        form.setAttribute('action', `/admin/kejadian/delete/${id}`);
 
         const modal = document.getElementById('deleteModal');
         const modalContent = document.getElementById('deleteModalContent');

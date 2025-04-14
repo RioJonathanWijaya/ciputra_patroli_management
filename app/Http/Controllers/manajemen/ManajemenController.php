@@ -84,7 +84,8 @@ class ManajemenController extends Controller
             'tanggal_bergabung' => $validated['tanggal_bergabung'] ?? '',
             'status_pernikahan' => $validated['status_pernikahan'] ?? '',
             'pendidikan_terakhir' => $validated['pendidikan_terakhir'] ?? '',
-            'manajemen_id' => $manajemen_id
+            'manajemen_id' => $manajemen_id,
+            'created_at' => now()->toDateTimeString(),
         ];
     
         $newmanajemenRef->set($manajemenData); 

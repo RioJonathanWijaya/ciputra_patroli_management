@@ -64,4 +64,5 @@ Route::middleware([\App\Http\Middleware\FirebaseAuthMiddleware::class])->group(f
     Route::get('admin/kejadian/index', [KejadianController::class, 'index'])->name('admin.kejadian.index');
     Route::get('/admin/kejadian/{id}', [KejadianController::class, 'show'])->name('admin.kejadian.show');
     Route::post('/admin/kejadian/tindakan/store', [KejadianController::class, 'storeTindakan'])->name('admin.kejadian.saveTindakan');
+    Route::delete('/admin/kejadian/delete/{id}', [KejadianController::class, 'delete'])->name('admin.kejadian.delete');
 });

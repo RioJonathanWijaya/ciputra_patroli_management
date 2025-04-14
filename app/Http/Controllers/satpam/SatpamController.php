@@ -95,6 +95,7 @@ class SatpamController extends Controller
             'tanggal_bergabung' => $validated['tanggal_bergabung'] ?? '',
             'status_pernikahan' => (int) $validated['status_pernikahan'] ?? 0,
             'pendidikan_terakhir' => $validated['pendidikan_terakhir'] ?? '',
+            'created_at' => now()->toDateTimeString(),
         ];
     
         $newSatpamRef->set($satpamData); 

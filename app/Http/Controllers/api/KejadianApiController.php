@@ -84,7 +84,8 @@ class KejadianApiController extends Controller
             'waktu_selesai' => 'nullable|string',
             'waktu_laporan' => 'required|string',
             'foto_bukti_kejadian' => 'nullable|array', 
-            'foto_bukti_kejadian.*' => 'string'
+            'foto_bukti_kejadian.*' => 'string',
+            'created_at' => now()->toDateTimeString(),
         ]);
 
         $kejadianId = $data['id'];
