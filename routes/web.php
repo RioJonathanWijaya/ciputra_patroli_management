@@ -10,6 +10,7 @@ use App\Http\Controllers\lokasi\LokasiController;
 use App\Http\Controllers\manajemen\ManajemenController;
 use App\Http\Controllers\PatrolRoutingController;
 use App\Http\Controllers\satpam\KepalaSatpamController;
+use App\Http\Controllers\patroli\PatroliController;
 
 Route::controller(AuthController::class)->group(function () {
     Route::get('/login', 'showLogin')->name('login');
@@ -17,9 +18,7 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
-
 Route::middleware([\App\Http\Middleware\FirebaseAuthMiddleware::class])->group(function () {
-
     Route::get('/', function () {
         return redirect()->route('admin.dashboard');
     });
@@ -35,6 +34,10 @@ Route::middleware([\App\Http\Middleware\FirebaseAuthMiddleware::class])->group(f
     Route::get('/admin/manajemen/manajemen', [ManajemenController::class, 'manajemen'])->name('admin.manajemen.manajemen');
     Route::get('/admin/kejadian/kejadian', [KejadianController::class, 'view'])->name('admin.kejadian.kejadian');
 
+    // Patrol Routes
+    Route::get('/admin/patroli/patroli', [PatroliController::class, 'patroli'])->name('admin.patroli.patroli');
+    Route::delete('/admin/patroli/{id}', [PatroliController::class, 'destroy'])->name('admin.patroli.destroy');
+   
     //Satpam Detail
     Route::get('admin/satpam/{id}/detail', [SatpamController::class, 'detail'])->name('admin.satpam.detail');
 
