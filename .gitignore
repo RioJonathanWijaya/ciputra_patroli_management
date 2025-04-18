@@ -21,3 +21,8 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Uploads
+/public/uploads/*
+!/public/uploads/.gitkeep
+!/public/uploads/satpam/.gitkeep

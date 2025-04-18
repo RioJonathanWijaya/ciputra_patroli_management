@@ -5,10 +5,20 @@
     <div class="bg-white rounded-2xl shadow p-6 flex items-center justify-between">
         <div class="flex items-center gap-4 w-full">
             <div class="flex items-center gap-4 flex-1">
-                <img src="https://via.placeholder.com/80" class="rounded-full w-20 h-20 object-cover" alt="Satpam Photo">
+                <div class="relative">
+                    <img src="{{ $satpam['foto_profile'] ? $satpam['foto_profile'] : asset('images/default-profile.png') }}" 
+                         class="rounded-full w-20 h-20 object-cover border-2 border-[#1C3A6B]" 
+                         alt="Satpam Photo"
+                         onerror="this.src='https://via.placeholder.com/80'">
+                    @if($satpam['status'] == 1)
+                        <div class="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                    @else
+                        <div class="absolute bottom-0 right-0 w-4 h-4 bg-gray-400 rounded-full border-2 border-white"></div>
+                    @endif
+                </div>
                 <div>
                     <h2 class="text-xl font-bold">{{ $satpam['nama'] }}</h2>
-                    <p class="text-sm text-gray-500">{{ $satpam['jabatan'] }} |
+                    <p class="text-sm text-gray-500">{{ $satpam['jabatan_text']}} |
                         @php
                         $lokasiBelumAda = !isset($satpam['nama_lokasi']) || $satpam['nama_lokasi'] === '-' || empty($satpam['nama_lokasi'])
                         @endphp
@@ -45,7 +55,7 @@
                     </div>
                     <div>
                         <p class="font-medium text-gray-600">Gender</p>
-                        <p class="text-gray-900">{{ $satpam['jenis_kelamin'] ?? '-' }}</p>
+                        <p class="text-gray-900">{{ $satpam['jenis_kelamin_text'] ?? '-' }}</p>
                     </div>
                     <div>
                         <p class="font-medium text-gray-600">Date of Birth</p>
@@ -57,7 +67,7 @@
                     </div>
                     <div>
                         <p class="font-medium text-gray-600">Marital Status</p>
-                        <p class="text-gray-900">{{ $satpam['status_pernikahan'] ?? '-' }}</p>
+                        <p class="text-gray-900">{{ $satpam['status_pernikahan_text'] ?? '-' }}</p>
                     </div>
                 </div>
             </div>
@@ -71,7 +81,7 @@
                     </div>
                     <div>
                         <p class="font-medium text-gray-600">Patrol Shift</p>
-                        <p class="text-gray-900">{{ $satpam['shift'] }}</p>
+                        <p class="text-gray-900">{{ $satpam['shift_text'] }}</p>
                     </div>
                     <div>
                         <p class="font-medium text-gray-600">Supervisor</p>

@@ -5,7 +5,7 @@
 
 <div class="relative overflow-auto sm:rounded-lg p-4">
     <div class="flex flex-col sm:flex-row flex-wrap space-y-4 sm:space-y-0 items-center justify-between mb-10">
-        <h1 class="text-3xl font-bold">Data Satpam</h1>
+        <h1 class="text-3xl font-bold">Data Kepala Satpam</h1>
         <a href="{{ route('admin.satpam.create') }}">
             <x-button color="secondary">ADD NEW</x-button>
         </a>
@@ -58,20 +58,26 @@
                     <td class="px-4 py-3 whitespace-nowrap">{{ $satpam['nip'] ?? '-' }}</td>
                     <td class="px-4 py-3 whitespace-nowrap">{{ $satpam['nama'] ?? '-' }}</td>
                     <td class="px-4 py-3 whitespace-nowrap max-w-[200px] truncate" title="{{ $satpam['email'] }}">{{ $satpam['email'] ?? '-' }}</td>
-                    <td class="px-4 py-3 whitespace-nowrap">{{ $satpam['shift'] ?? '-' }}</td>
-                    <td class="px-4 py-3 whitespace-nowrap">{{ $satpam['jabatan'] ?? '-' }}</td>
+                    <td class="px-4 py-3 whitespace-nowrap">{{ $satpam['shift_text'] }}</td>
+                    <td class="px-4 py-3 whitespace-nowrap">{{ $satpam['jabatan_text'] }}</td>
                     <td class="px-4 py-3 whitespace-nowrap">{{ $satpam['nomor_telepon'] ?? '-' }}</td>
                     <td class="px-4 py-3 whitespace-nowrap">{{ $satpam['lokasi'] ?? '-' }}</td>
                     <td class="px-4 py-3 whitespace-nowrap">
-                        @php
-                        $status = $satpam['status'] ?? '-';
-                        $statusClass = match ($status) {
-                        'Aktif' => 'bg-green-100 text-green-800',
-                        'Cuti' => 'bg-orange-100 text-orange-800',
-                        'Tidak Aktif' => 'bg-red-100 text-red-800',
-                        default => 'bg-gray-100 text-gray-800',
+                    @php
+                        if($satpam['status'] == 0){
+                            $status = 'Aktif';
+                        } else if ($satpam['status'] == 1){
+                            $status = 'Cuti';
+                        } else {
+                            $status = 'Tidak Aktif';
                         };
-                        @endphp
+                        $statusClass = match ($status) {
+                            'Aktif' => 'bg-green-100 text-green-800',
+                            'Cuti' => 'bg-orange-100 text-orange-800',
+                            'Tidak Aktif' => 'bg-red-100 text-red-800',
+                            default => 'bg-gray-100 text-gray-800',
+                        };
+                    @endphp
                         <span class="px-3 py-1 text-sm font-medium rounded-full {{ $statusClass }}">
                             {{ $status }}
                         </span>

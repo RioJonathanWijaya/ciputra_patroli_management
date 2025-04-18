@@ -43,15 +43,19 @@
                 <h3 class="text-xl font-semibold text-[#1C3A6B] mb-4">Foto Profil</h3>
                 <div class="flex flex-col items-center">
                     <div class="relative w-40 h-40 mb-4 transition hover:scale-105 duration-300 border border-[#0D7C5D]/30 rounded-xl overflow-hidden">
-                        <img id="profileImage" src="https://via.placeholder.com/160" alt="Profile" class="w-full h-full object-cover">
+                        <img id="profileImage" src="{{ asset('images/default-profile.png') }}" alt="Profile" class="w-full h-full object-cover">
                         <button type="button" onclick="removePhoto()" class="absolute top-0 right-0 bg-white rounded-full p-1 shadow hover:bg-red-100 transition">
                             <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
                     </div>
-                    <input type="file" name="photo" id="uploadPhotoInput" class="hidden" onchange="previewPhoto(event)">
+                    <input type="file" name="photo" id="uploadPhotoInput" class="hidden" accept="image/*" onchange="previewPhoto(event)">
                     <button type="button" onclick="document.getElementById('uploadPhotoInput').click()" class="bg-[#0D7C5D] hover:bg-[#0b684e] text-white px-5 py-2 rounded-xl transition font-medium">Upload Photo</button>
+                    <p class="mt-2 text-sm text-gray-500">Format: JPG, PNG (max. 2MB)</p>
+                    @error('photo')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
 
@@ -112,7 +116,6 @@
                 </div>
             </div>
 
-            {{-- Data Satpam --}}
             <div class="col-span-3 bg-white shadow-lg border border-[#1C3A6B]/20 rounded-2xl p-6 animate-fade-in space-y-6">
                 <h3 class="text-xl font-semibold text-[#1C3A6B] border-b border-gray-200 pb-2">Data Satpam</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -177,7 +180,7 @@
         const $supervisorSelect = $('#supervisorSelect');
 
         function toggleSupervisorField() {
-            if ($jabatanSelect.val() === 'Kepala Shift') {
+            if ($jabatanSelect.val() === "1") {
                 $supervisorSelect.val('').prop('disabled', true);
             $supervisorField
                 .removeClass('max-h-[200px] opacity-100')
@@ -195,16 +198,34 @@
         $jabatanSelect.on('change', toggleSupervisorField);
 
     function previewPhoto(event) {
-        const reader = new FileReader();
-        reader.onload = () => {
-            document.getElementById('profileImage').src = reader.result;
-        };
-        reader.readAsDataURL(event.target.files[0]);
+        const file = event.target.files[0];
+        if (file) {
+            // Validate file type
+            const validTypes = ['image/jpeg', 'image/png'];
+            if (!validTypes.includes(file.type)) {
+                alert('Please upload a valid image file (JPEG or PNG)');
+                event.target.value = '';
+                return;
+            }
+
+            // Validate file size (2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                alert('File size should not exceed 2MB');
+                event.target.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = () => {
+                document.getElementById('profileImage').src = reader.result;
+            };
+            reader.readAsDataURL(file);
+        }
     }
 
     function removePhoto() {
-        document.getElementById('profileImage').src = 'https://via.placeholder.com/160';
-        document.getElementById('uploadPhotoInput').value = null;
+        document.getElementById('profileImage').src = "{{ asset('images/default-profile.png') }}";
+        document.getElementById('uploadPhotoInput').value = '';
     }
 
     function openModal() {

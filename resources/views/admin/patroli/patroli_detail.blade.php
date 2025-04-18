@@ -6,7 +6,7 @@
         <!-- Header Section -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
             <div class="flex items-center space-x-4 mb-4 sm:mb-0">
-                <a href="{{ route('admin.patroli.index') }}" class="text-gray-600 hover:text-gray-900">
+                <a href="{{ route('admin.patroli.patroli') }}" class="text-gray-600 hover:text-gray-900">
                     <i class="fas fa-arrow-left text-xl"></i>
                 </a>
                 <h1 class="text-3xl font-bold text-gray-900">Detail Patroli</h1>
@@ -71,23 +71,73 @@
                     <h2 class="text-xl font-semibold text-gray-900 mb-4">Checkpoints</h2>
                     <div class="space-y-4">
                         @foreach($patroli['checkpoints'] as $checkpoint)
-                        <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                            <div class="flex-shrink-0">
-                                <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                                    <i class="fas fa-map-pin text-indigo-600"></i>
+                        <div class="flex flex-col space-y-4 p-4 bg-gray-50 rounded-lg">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                                        <i class="fas fa-map-pin text-indigo-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-medium text-gray-900">{{ $checkpoint['nama'] }}</h3>
+                                        <p class="text-sm text-gray-500">
+                                            <span class="font-medium {{ $checkpoint['status'] === 'On Time' ? 'text-green-600' : 'text-yellow-600' }}">
+                                                {{ $checkpoint['status'] }}
+                                            </span>
+                                            • {{ Carbon\Carbon::parse($checkpoint['timestamp'])->format('H:i') }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full
+                                    {{ $checkpoint['distance_status'] === 'Far' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' }}">
+                                    {{ $checkpoint['distance_status'] }}
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="space-y-2">
+                                    <div class="flex items-center space-x-2 text-sm">
+                                        <i class="fas fa-map-marker-alt text-gray-500"></i>
+                                        <span class="text-gray-700">Target Location:</span>
+                                    </div>
+                                    <div class="pl-6 text-sm text-gray-600">
+                                        {{ $checkpoint['latitude'] }}, {{ $checkpoint['longitude'] }}
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex items-center space-x-2 text-sm">
+                                        <i class="fas fa-location-arrow text-gray-500"></i>
+                                        <span class="text-gray-700">Current Location:</span>
+                                    </div>
+                                    <div class="pl-6 text-sm text-gray-600">
+                                        {{ $checkpoint['current_latitude'] }}, {{ $checkpoint['current_longitude'] }}
+                                    </div>
                                 </div>
                             </div>
-                            <div class="flex-1">
-                                <h3 class="font-medium text-gray-900">{{ $checkpoint['nama'] }}</h3>
-                                <p class="text-sm text-gray-500">Status: 
-                                    <span class="font-medium {{ $checkpoint['status'] === 'Completed' ? 'text-green-600' : 'text-yellow-600' }}">
-                                        {{ $checkpoint['status'] }}
-                                    </span>
-                                </p>
+
+                            @if($checkpoint['keterangan'])
+                            <div class="space-y-2">
+                                <div class="flex items-center space-x-2 text-sm">
+                                    <i class="fas fa-comment text-gray-500"></i>
+                                    <span class="text-gray-700">Notes:</span>
+                                </div>
+                                <div class="pl-6 text-sm text-gray-600">
+                                    {{ $checkpoint['keterangan'] }}
+                                </div>
                             </div>
-                            <div class="text-sm text-gray-500">
-                                {{ $checkpoint['waktu'] }}
+                            @endif
+
+                            @if($checkpoint['image_path'])
+                            <div class="space-y-2">
+                                <div class="flex items-center space-x-2 text-sm">
+                                    <i class="fas fa-camera text-gray-500"></i>
+                                    <span class="text-gray-700">Photo:</span>
+                                </div>
+                                <div class="pl-6">
+                                    <img src="{{ $checkpoint['image_path'] }}" alt="Checkpoint photo" 
+                                        class="w-full max-w-xs rounded-lg shadow-sm">
+                                </div>
                             </div>
+                            @endif
                         </div>
                         @endforeach
                     </div>
@@ -108,11 +158,11 @@
                 <div class="bg-white rounded-xl shadow-sm p-6">
                     <h2 class="text-xl font-semibold text-gray-900 mb-4">Aksi</h2>
                     <div class="space-y-3">
-                        <button onclick="window.location.href='{{ route('admin.patroli.index') }}'"
+                        <a href="{{ route('admin.patroli.patroli') }}"
                             class="w-full flex items-center justify-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">
                             <i class="fas fa-arrow-left"></i>
                             <span>Kembali</span>
-                        </button>
+                        </a>
                         <form action="{{ route('admin.patroli.destroy', $patroli['id']) }}" method="POST" class="w-full">
                             @csrf
                             @method('DELETE')
@@ -160,5 +210,6 @@
     function hideDeleteModal() {
         document.getElementById('deleteModal').classList.add('hidden');
     }
+
 </script>
 @endsection 

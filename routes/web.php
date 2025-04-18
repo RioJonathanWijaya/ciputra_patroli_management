@@ -37,7 +37,8 @@ Route::middleware([\App\Http\Middleware\FirebaseAuthMiddleware::class])->group(f
     // Patrol Routes
     Route::get('/admin/patroli/patroli', [PatroliController::class, 'patroli'])->name('admin.patroli.patroli');
     Route::delete('/admin/patroli/{id}', [PatroliController::class, 'destroy'])->name('admin.patroli.destroy');
-   
+    Route::get('/admin/patroli/{id}/detail', [PatroliController::class, 'show'])->name('admin.patroli.show');
+    
     //Satpam Detail
     Route::get('admin/satpam/{id}/detail', [SatpamController::class, 'detail'])->name('admin.satpam.detail');
 

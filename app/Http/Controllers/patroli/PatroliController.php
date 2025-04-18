@@ -16,6 +16,7 @@ class PatroliController extends Controller
     protected $satpamRef;
     protected $jadwalRef;
     protected $penugasanRef;
+    protected $patroliCheckpointRef;
 
     public function __construct(Database $database)
     {
@@ -25,6 +26,7 @@ class PatroliController extends Controller
         $this->satpamRef = $this->database->getReference('satpam');
         $this->jadwalRef = $this->database->getReference('jadwal_patroli');
         $this->penugasanRef = $this->database->getReference('penugasan');
+        $this->patroliCheckpointRef = $this->database->getReference('patroli_checkpoint');
     }
 
     public function patroli()
@@ -144,6 +146,18 @@ class PatroliController extends Controller
             $jadwal = $this->jadwalRef->getChild($patroli['jadwalPatroliId'])->getValue();
             $penugasan = $this->penugasanRef->getChild($patroli['penugasanId'])->getValue();
 
+            // Get checkpoint data
+            $checkpoints = [];
+            $checkpointSnapshot = $this->patroliCheckpointRef->getSnapshot();
+            if ($checkpointSnapshot->exists()) {
+                $allCheckpoints = $checkpointSnapshot->getValue() ?? [];
+                foreach ($allCheckpoints as $checkpointId => $checkpoint) {
+                    if (isset($checkpoint['patroli_id']) && $checkpoint['patroli_id'] === $id) {
+                        $checkpoints[$checkpointId] = $checkpoint;
+                    }
+                }
+            }
+
             // Format the data for the view
             $patroliData = [
                 'id' => $id,
@@ -157,8 +171,9 @@ class PatroliController extends Controller
                 'durasi_patroli' => $patroli['durasiPatroli'] ?? 0,
                 'catatan' => $patroli['catatanPatroli'] ?? 'Tidak ada catatan',
                 'status' => $this->getStatus($patroli['durasiPatroli'] ?? 0, $patroli['isTerlambat'] ?? false),
-                'checkpoints' => $this->formatCheckpoints($patroli['rutePatroli'] ?? [])
+                'checkpoints' => $this->formatCheckpoints($checkpoints)
             ];
+
 
             return view('admin.patroli.patroli_detail', ['patroli' => $patroliData]);
 
@@ -175,13 +190,28 @@ class PatroliController extends Controller
         }
 
         $formatted = [];
-        foreach ($checkpoints as $checkpoint) {
+        foreach ($checkpoints as $checkpointId => $checkpoint) {
             $formatted[] = [
+                'id' => $checkpointId,
                 'nama' => $checkpoint['nama'] ?? 'Unknown Checkpoint',
                 'status' => $checkpoint['status'] ?? 'Pending',
-                'waktu' => isset($checkpoint['waktu']) ? Carbon::parse($checkpoint['waktu'])->format('H:i') : '-'
+                'timestamp' => $checkpoint['timestamp'] ?? null,
+                'current_latitude' => $checkpoint['current_latitude'] ?? null,
+                'current_longitude' => $checkpoint['current_longitude'] ?? null,
+                'latitude' => $checkpoint['latitude'] ?? null,
+                'longitude' => $checkpoint['longitude'] ?? null,
+                'distance_status' => $checkpoint['distance_status'] ?? 'Unknown',
+                'keterangan' => $checkpoint['keterangan'] ?? '',
+                'image_path' => $checkpoint['image_path'] ?? null
             ];
         }
+
+        // Sort checkpoints by timestamp if available
+        usort($formatted, function($a, $b) {
+            $timeA = isset($a['timestamp']) ? strtotime($a['timestamp']) : 0;
+            $timeB = isset($b['timestamp']) ? strtotime($b['timestamp']) : 0;
+            return $timeA - $timeB;
+        });
 
         return $formatted;
     }
