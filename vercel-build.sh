@@ -14,9 +14,18 @@ php artisan view:cache
 # Create storage link
 php artisan storage:link
 
-# Set proper permissions
+# Create necessary directories with proper permissions
+mkdir -p storage/framework/{sessions,views,cache}
+mkdir -p bootstrap/cache
 chmod -R 775 storage bootstrap/cache
 
-# Create necessary directories
-mkdir -p storage/framework/{sessions,views,cache}
-chmod -R 775 storage/framework 
+# Create temp directory for Firebase
+mkdir -p /tmp/firebase
+chmod -R 775 /tmp/firebase
+
+# Set proper permissions for storage
+chmod -R 775 storage
+chmod -R 775 bootstrap/cache
+
+# Ensure PHP has write access to temp directories
+chmod -R 777 /tmp 
