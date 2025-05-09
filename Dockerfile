@@ -23,11 +23,14 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy existing application directory
-COPY . .
+# Copy composer files first to leverage Docker cache
+COPY composer.json composer.lock ./
 
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader
+
+# Copy the rest of the application
+COPY . .
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \
@@ -44,19 +47,13 @@ RUN mkdir -p storage/framework/{sessions,views,cache} \
     && chmod -R 775 storage/framework \
     && chmod -R 775 storage/app/firebase
 
-# Generate application key
-RUN php artisan key:generate --force
-
-# Clear and cache configuration
-RUN php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
-
-# Create storage link
-RUN php artisan storage:link
+# Create a script to handle environment setup
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Expose port 80
 EXPOSE 80
 
-# Start Apache
+# Use the entrypoint script
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["apache2-foreground"] 
