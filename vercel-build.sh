@@ -15,4 +15,8 @@ php artisan view:cache
 php artisan storage:link
 
 # Set proper permissions
-chmod -R 775 storage bootstrap/cache 
+chmod -R 775 storage bootstrap/cache
+
+# Create necessary directories
+mkdir -p storage/framework/{sessions,views,cache}
+chmod -R 775 storage/framework 
