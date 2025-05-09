@@ -34,8 +34,9 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts --no-autoloader
 # Copy the rest of the application
 COPY . .
 
-# Fix directory permissions
-RUN chown -R www-data:www-data /var/www/html \
+# Make artisan executable and ensure proper permissions
+RUN chmod +x artisan \
+    && chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/storage \
     && chmod -R 775 /var/www/html/bootstrap/cache
 
