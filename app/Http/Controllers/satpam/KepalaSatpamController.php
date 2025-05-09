@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Satpam;
+namespace App\Http\Controllers\satpam;
 
 use App\Http\Controllers\Controller;
 use App\Enums\ShiftEnum;

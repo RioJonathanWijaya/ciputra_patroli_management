@@ -3,13 +3,7 @@
     "builds": [
         {
             "src": "public/index.php",
-            "use": "vercel-php@0.6.0",
-            "config": {
-                "php": {
-                    "extensions": ["openssl", "mbstring", "json", "fileinfo", "pdo", "pdo_mysql"],
-                    "systemDependencies": ["libssl1.1"]
-                }
-            }
+            "use": "@vercel/php"
         }
     ],
     "routes": [
