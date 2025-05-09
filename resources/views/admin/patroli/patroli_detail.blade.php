@@ -3,7 +3,10 @@
 @section('content')
 <div class="min-h-screen bg-gray-50 py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header Section -->
+        <x-breadcrumbs :items="[
+            ['label' => 'Patroli', 'url' => route('admin.patroli.patroli')],
+            ['label' => 'Detail Patroli']
+        ]" />
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
             <div class="flex items-center space-x-4 mb-4 sm:mb-0">
                 <a href="{{ route('admin.patroli.patroli') }}" class="text-gray-600 hover:text-gray-900">
@@ -19,11 +22,8 @@
             </div>
         </div>
 
-        <!-- Main Content -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Left Column - Patrol Info -->
             <div class="lg:col-span-2 space-y-6">
-                <!-- Patrol Information Card -->
                 <div class="bg-white rounded-xl shadow-sm p-6">
                     <h2 class="text-xl font-semibold text-gray-900 mb-4">Informasi Patroli</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -66,7 +66,11 @@
                     </div>
                 </div>
 
-                <!-- Checkpoints Card -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">Rute Patroli</h2>
+                    <div id="patroli-map" class="w-full h-96 rounded-lg"></div>
+                </div>
+
                 <div class="bg-white rounded-xl shadow-sm p-6">
                     <h2 class="text-xl font-semibold text-gray-900 mb-4">Checkpoints</h2>
                     <div class="space-y-4">
@@ -144,9 +148,7 @@
                 </div>
             </div>
 
-            <!-- Right Column - Additional Info -->
             <div class="space-y-6">
-                <!-- Notes Card -->
                 <div class="bg-white rounded-xl shadow-sm p-6">
                     <h2 class="text-xl font-semibold text-gray-900 mb-4">Catatan</h2>
                     <div class="bg-gray-50 rounded-lg p-4">
@@ -154,7 +156,6 @@
                     </div>
                 </div>
 
-                <!-- Actions Card -->
                 <div class="bg-white rounded-xl shadow-sm p-6">
                     <h2 class="text-xl font-semibold text-gray-900 mb-4">Aksi</h2>
                     <div class="space-y-3">
@@ -179,7 +180,6 @@
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
 <div id="deleteModal" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm justify-center items-center transition-all duration-300 ease-out">
     <div class="animate-fadeInUp bg-white p-6 rounded-2xl shadow-2xl w-full max-w-md transform scale-95 transition-all duration-300 ease-out">
         <h2 class="text-xl font-bold text-red-600 mb-3 flex items-center gap-2">
@@ -211,5 +211,119 @@
         document.getElementById('deleteModal').classList.add('hidden');
     }
 
+</script>
+@endsection
+
+@section('scripts')
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize map
+        const map = L.map('patroli-map').setView([-6.2088, 106.8456], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Get checkpoints data from Blade template
+        const checkpoints = @json($patroli['checkpoints']);
+        
+        // Create markers and collect coordinates for polyline
+        const coordinates = [];
+        const markers = [];
+        
+        checkpoints.forEach((checkpoint, index) => {
+            const lat = parseFloat(checkpoint.latitude);
+            const lon = parseFloat(checkpoint.longitude);
+            
+            if (!isNaN(lat) && !isNaN(lon)) {
+                coordinates.push([lat, lon]);
+                
+                // Create marker with custom icon
+                const marker = L.marker([lat, lon], {
+                    icon: L.divIcon({
+                        className: 'custom-marker',
+                        html: `<div class="bg-white rounded-full p-2 shadow-lg">
+                                <i class="fas fa-map-marker-alt text-${checkpoint.status === 'On Time' ? 'green' : 'yellow'}-600"></i>
+                              </div>`,
+                        iconSize: [30, 30],
+                        iconAnchor: [15, 30]
+                    })
+                });
+                
+                // Add popup with checkpoint info
+                marker.bindPopup(`
+                    <div class="p-2">
+                        <h3 class="font-semibold">${checkpoint.nama}</h3>
+                        <p class="text-sm">Status: ${checkpoint.status}</p>
+                        <p class="text-sm">Time: ${checkpoint.timestamp}</p>
+                    </div>
+                `);
+                
+                markers.push(marker);
+                marker.addTo(map);
+            }
+        });
+
+        // Create polyline
+        if (coordinates.length > 0) {
+            const polyline = L.polyline(coordinates, {
+                color: '#1C3A6B',
+                weight: 3,
+                opacity: 0.8,
+                dashArray: '10, 10'
+            }).addTo(map);
+
+            // Fit map bounds to show all markers
+            const bounds = L.latLngBounds(coordinates);
+            map.fitBounds(bounds, { padding: [50, 50] });
+
+            // Animate the polyline
+            let currentIndex = 0;
+            const animatePolyline = () => {
+                if (currentIndex < coordinates.length - 1) {
+                    const start = coordinates[currentIndex];
+                    const end = coordinates[currentIndex + 1];
+                    
+                    // Create a temporary polyline for animation
+                    const tempLine = L.polyline([start, end], {
+                        color: '#1C3A6B',
+                        weight: 3,
+                        opacity: 1
+                    }).addTo(map);
+
+                    // Animate the temporary line
+                    const duration = 2000; // 2 seconds per segment
+                    const startTime = performance.now();
+                    
+                    const animate = (currentTime) => {
+                        const elapsed = currentTime - startTime;
+                        const progress = Math.min(elapsed / duration, 1);
+                        
+                        const currentPoint = [
+                            start[0] + (end[0] - start[0]) * progress,
+                            start[1] + (end[1] - start[1]) * progress
+                        ];
+                        
+                        tempLine.setLatLngs([start, currentPoint]);
+                        
+                        if (progress < 1) {
+                            requestAnimationFrame(animate);
+                        } else {
+                            map.removeLayer(tempLine);
+                            currentIndex++;
+                            if (currentIndex < coordinates.length - 1) {
+                                setTimeout(animatePolyline, 500); // Delay between segments
+                            }
+                        }
+                    };
+                    
+                    requestAnimationFrame(animate);
+                }
+            };
+
+            // Start animation after a short delay
+            setTimeout(animatePolyline, 1000);
+        }
+    });
 </script>
 @endsection 

@@ -1,6 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
+<div class="min-h-screen bg-gray-50 p-4 md:p-6">
+    <div class="relative overflow-auto sm:rounded-lg p-4">
+    <x-breadcrumbs :items="[
+                ['label' => 'Lokasi', 'url' => route('admin.lokasi.lokasi')],
+                ['label' => 'Tambah Lokasi']
+            ]" />
 <div class="max-w-4xl mx-auto bg-white shadow-2xl rounded-3xl p-8 space-y-8 animate-fade-in">
     <h2 class="text-3xl font-bold text-gray-800">Tambah Lokasi Baru</h2>
 

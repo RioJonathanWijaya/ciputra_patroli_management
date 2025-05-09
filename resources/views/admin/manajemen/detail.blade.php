@@ -1,8 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="space-y-6">
-<div class="bg-white rounded-2xl shadow p-6 flex items-center justify-between">
+<div class="min-h-screen bg-gray-50 p-4 md:p-6">
+    <div class="relative overflow-auto sm:rounded-lg p-4">
+    <x-breadcrumbs :items="[
+                ['label' => 'Manajemen', 'url' => route('admin.manajemen.manajemen')],
+                ['label' => 'Detail Manajemen']
+            ]" />
+<div class="bg-white rounded-2xl shadow p-6 flex items-center justify-between"> 
     <div class="flex items-center gap-4 w-full">
         <div class="flex items-center gap-4 flex-1">
             <img src="https://via.placeholder.com/80" class="rounded-full w-20 h-20 object-cover" alt="Manajemen Photo">
@@ -16,7 +21,7 @@
 
         <div class="text-sm text-right text-gray-500 whitespace-nowrap">
             <p class="font-medium text-gray-600">Tanggal Bergabung</p>
-            <p class="text-gray-900">{{ $manajemen['tanggal_bergabung'] ?? '-' }}</p>
+            <p class="text-gray-900">{{ $manajemen['tanggal_bergabung'] ? \Carbon\Carbon::parse($manajemen['tanggal_bergabung'])->format('d M Y') : '-' }}</p>
         </div>
     </div>
 </div>

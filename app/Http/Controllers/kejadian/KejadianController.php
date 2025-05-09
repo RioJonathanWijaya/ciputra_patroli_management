@@ -9,6 +9,9 @@ use Kreait\Firebase\Contract\Database;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Models\Kejadian;
+use App\Models\FotoBuktiKejadian;
+use App\Models\Tindakan;
 
 class KejadianController extends Controller
 {
@@ -32,39 +35,41 @@ class KejadianController extends Controller
     public function show($id)
     {
         try {
-            $user = session('firebase_user');
-            $manajemenId = $user['uid'] ?? null;
-    
-            if (!$manajemenId) {
-                return response()->json([
-                    'error' => 'Unauthorized',
-                    'message' => 'User not found in session.'
-                ], 401);
-            }
-    
             $kejadian = $this->kejadianRef->getChild($id)->getValue();
+            
             if (!$kejadian) {
-                throw new \Exception('Kejadian not found.');
+                return redirect()->route('admin.kejadian.kejadian')->with('error', 'Kejadian tidak ditemukan.');
             }
-    
+
+            // Get notifications for this kejadian
+            $notifications = $this->database->getReference('notifications')
+                ->orderByChild('kejadian_id')
+                ->equalTo($id)
+                ->getValue();
+
+            // Mark notifications as read
+            if ($notifications) {
+                foreach ($notifications as $notificationId => $notification) {
+                    if (!$notification['read']) {
+                        $this->database->getReference('notifications')
+                            ->child($notificationId)
+                            ->update(['read' => true]);
+                    }
+                }
+            }
 
             $fotos = $this->getFotoForKejadian($id);
-
             $tindakan = $this->getTindakanForKejadian($id);
-    
-            $kejadianData = [
+
+            $kejadianData = array_merge($kejadian, [
                 'id' => $id,
-                'data' => $kejadian,
                 'foto_bukti_kejadian' => $fotos,
                 'tindakan' => $tindakan,
-            ];
-            return  response()->json($kejadianData);
-    
+            ]);
+
+            return view('admin.kejadian.detail', compact('kejadianData'));
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Kejadian not found',
-                'message' => $e->getMessage()
-            ], 404);
+            return redirect()->route('admin.kejadian.kejadian')->with('error', 'Gagal memuat detail kejadian: ' . $e->getMessage());
         }
     }
 
@@ -130,7 +135,7 @@ class KejadianController extends Controller
     $request->validate([
         'kejadian_id' => 'required|string',
         'tindakan' => 'required|string',
-        'status' => 'nullable|integer|0,1,2'
+        'status' => 'nullable|integer|in:0,1,2'
     ]);
 
     $user = session('firebase_user');
@@ -162,7 +167,6 @@ class KejadianController extends Controller
 
     $selectedStatus = $statusLabels[$status] ?? 'Baru';
 
-    //Change status in kejadian
     $this->kejadianRef->getChild($kejadianId)->update([
         'status' => $selectedStatus,
         'waktu_selesai' => now()->toDateTimeString()
@@ -208,5 +212,169 @@ return redirect()->route('admin.kejadian.kejadian')->with('success', 'Kejadian b
     }
 }
 
+public function store(Request $request)
+{
+    try {
+        $validated = $request->validate([
+            'nama_kejadian' => 'required|string',
+            'lokasi_kejadian' => 'required|string',
+            'tanggal_kejadian' => 'required|date',
+            'tipe_kejadian' => 'required|string',
+            'keterangan' => 'required|string',
+            'nama_korban' => 'nullable|string',
+            'alamat_korban' => 'nullable|string',
+            'keterangan_korban' => 'nullable|string',
+            'status' => 'required|string',
+            'satpam_id' => 'required|string',
+            'foto_bukti' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        $kejadianId = (string) Str::uuid();
+
+        $fotoBuktiUrl = null;
+        if ($request->hasFile('foto_bukti')) {
+            $file = $request->file('foto_bukti');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            
+            $uploadPath = public_path('uploads/kejadian');
+            if (!file_exists($uploadPath)) {
+                mkdir($uploadPath, 0777, true);
+            }
+            
+            if ($file->move($uploadPath, $filename)) {
+                // Generate the URL for the uploaded file
+                $fotoBuktiUrl = url('uploads/kejadian/' . $filename);
+
+                $fotoData = [
+                    'kejadian_id' => $kejadianId,
+                    'url' => $fotoBuktiUrl,
+                    'created_at' => now()->toDateTimeString()
+                ];
+                $this->fotoRef->push($fotoData);
+            } else {
+                throw new \Exception('Failed to upload photo');
+            }
+        }
+
+        $user = session('firebase_user');
+        $manajemenId = $user['uid'] ?? null;
+
+        if (!$manajemenId) {
+            throw new \Exception('User not found in session');
+        }
+
+        $kejadianData = [
+            'id' => $kejadianId,
+            'nama_kejadian' => $validated['nama_kejadian'],
+            'lokasi_kejadian' => $validated['lokasi_kejadian'],
+            'tanggal_kejadian' => $validated['tanggal_kejadian'],
+            'tipe_kejadian' => $validated['tipe_kejadian'],
+            'keterangan' => $validated['keterangan'],
+            'nama_korban' => $validated['nama_korban'] ?? null,
+            'alamat_korban' => $validated['alamat_korban'] ?? null,
+            'keterangan_korban' => $validated['keterangan_korban'] ?? null,
+            'status' => $validated['status'],
+            'satpam_id' => $validated['satpam_id'],
+            'foto_bukti_kejadian' => $fotoBuktiUrl,
+            'manajemen_id' => $manajemenId,
+            'is_notifikasi' => true,
+            'is_pencurian' => false,
+            'is_kecelakaan' => false,
+            'waktu_laporan' => now()->toDateTimeString(),
+            'waktu_selesai' => null,
+            'created_at' => now()->toDateTimeString(),
+        ];
+
+        $this->kejadianRef->getChild($kejadianId)->set($kejadianData);
+
+        return redirect()->route('admin.kejadian.kejadian')->with('success', 'Data Kejadian berhasil ditambahkan!');
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', 'Gagal menambahkan Kejadian: ' . $e->getMessage());
+    }
+}
+
+public function create(){
+    return view('admin.kejadian.create');
+}
+
+public function edit($id)
+{
+    try {
+        $kejadian = $this->kejadianRef->getChild($id)->getValue();
+        
+        if (!$kejadian) {
+            return redirect()->route('admin.kejadian.kejadian')->with('error', 'Kejadian tidak ditemukan');
+        }
+
+        $fotos = $this->getFotoForKejadian($id);
+        $kejadian['foto_bukti_kejadian'] = $fotos;
+        $kejadian['id'] = $id;
+
+        return view('admin.kejadian.edit', compact('kejadian'));
+    } catch (\Exception $e) {
+        return redirect()->route('admin.kejadian.kejadian')->with('error', 'Gagal memuat data kejadian: ' . $e->getMessage());
+    }
+}
+
+public function update(Request $request, $id)
+{
+    try {
+        $validated = $request->validate([
+            'nama_kejadian' => 'required|string',
+            'lokasi_kejadian' => 'required|string',
+            'tanggal_kejadian' => 'required|date',
+            'tipe_kejadian' => 'required|string',
+            'keterangan' => 'required|string',
+            'nama_korban' => 'nullable|string',
+            'alamat_korban' => 'nullable|string',
+            'keterangan_korban' => 'nullable|string',
+            'status' => 'required|string',
+            'satpam_id' => 'required|string',
+            'foto_bukti' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        $kejadianData = [
+            'nama_kejadian' => $validated['nama_kejadian'],
+            'lokasi_kejadian' => $validated['lokasi_kejadian'],
+            'tanggal_kejadian' => $validated['tanggal_kejadian'],
+            'tipe_kejadian' => $validated['tipe_kejadian'],
+            'keterangan' => $validated['keterangan'],
+            'nama_korban' => $validated['nama_korban'] ?? null,
+            'alamat_korban' => $validated['alamat_korban'] ?? null,
+            'keterangan_korban' => $validated['keterangan_korban'] ?? null,
+            'status' => $validated['status'],
+            'satpam_id' => $validated['satpam_id'],
+            'updated_at' => now()->toDateTimeString(),
+        ];
+
+        if ($request->hasFile('foto_bukti')) {
+            $file = $request->file('foto_bukti');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            
+            $uploadPath = public_path('uploads/kejadian');
+            if (!file_exists($uploadPath)) {
+                mkdir($uploadPath, 0777, true);
+            }
+            
+            if ($file->move($uploadPath, $filename)) {
+                $fotoBuktiUrl = url('uploads/kejadian/' . $filename);
+                $kejadianData['foto_bukti_kejadian'] = $fotoBuktiUrl;
+
+                $fotoData = [
+                    'kejadian_id' => $id,
+                    'url' => $fotoBuktiUrl,
+                    'created_at' => now()->toDateTimeString()
+                ];
+                $this->fotoRef->push($fotoData);
+            }
+        }
+
+        $this->kejadianRef->getChild($id)->update($kejadianData);
+
+        return redirect()->route('admin.kejadian.kejadian')->with('success', 'Data Kejadian berhasil diperbarui!');
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', 'Gagal memperbarui Kejadian: ' . $e->getMessage());
+    }
+}
 
 }

@@ -1,6 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
+<div class="min-h-screen bg-gray-50 p-4 md:p-6">
+    <div class="relative overflow-auto sm:rounded-lg p-4">
+        <x-breadcrumbs :items="[
+            ['label' => 'Jadwal Patroli', 'url' => route('admin.jadwal_patroli.jadwal_patroli')],
+            ['label' => 'Tambah Jadwal Patroli', 'url' => route('admin.jadwal_patroli.create')],
+        ]" />
 <div class="max-w-5xl mx-auto bg-white shadow-2xl rounded-3xl p-10 space-y-8 animate-fade-in">
     <h1 class="text-4xl font-bold text-gray-800 mb-6 animate-slide-in">Tambah Jadwal Patroli</h1>
 
@@ -19,7 +25,7 @@
         @csrf
 
         <div class="transition duration-300 ease-in-out transform">
-            <label for="nama" class="block text-sm font-medium text-gray-700 mb-2">Nama Jadwal Patroli</label>
+            <label for="nama" class="block text-sm font-medium text-gray-700 mb-2">Nama Jadwal Patroli <span class="text-red-500">*</span></label>
             <input for="nama" name="nama" type="text" class="w-full rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-3">
         </div>
 
@@ -29,7 +35,7 @@
         </div>
 
         <div class="transition duration-300 ease-in-out transform">
-            <label for="lokasi" class="block text-sm font-medium text-gray-700 mb-2">Lokasi</label>
+            <label for="lokasi" class="block text-sm font-medium text-gray-700 mb-2">Lokasi <span class="text-red-500">*</span></label>
             <select id="lokasi" name="lokasi" class="select2 w-full rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-3">
                 <option value="">Pilih Lokasi</option>
                 @foreach($lokasiData as $id => $lokasi)
@@ -39,7 +45,7 @@
         </div>
 
         <div id="satpam_pagi_wrapper" class="transition duration-300 ease-in-out transform">
-            <label for="satpam_shift_pagi" class="block text-sm font-medium text-gray-700 mb-2">Satpam Shift Pagi</label>
+            <label for="satpam_shift_pagi" class="block text-sm font-medium text-gray-700 mb-2">Satpam Shift Pagi <span class="text-red-500">*</span></label>
             <select id="satpam_shift_pagi" name="satpam_shift_pagi" class="select2 w-full rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-3" >
                 <option value="">Pilih Satpam</option>
                 @foreach($satpamPagi as $id => $satpam)
@@ -49,7 +55,7 @@
         </div>
 
         <div id="satpam_malam_wrapper" class="transition duration-300 ease-in-out transform">
-            <label for="satpam_shift_malam" class="block text-sm font-medium text-gray-700 mb-2">Satpam Shift Malam</label>
+            <label for="satpam_shift_malam" class="block text-sm font-medium text-gray-700 mb-2">Satpam Shift Malam <span class="text-red-500">*</span></label>
             <select id="satpam_shift_malam" name="satpam_shift_malam" class="select2 w-full rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-3">
                 <option value="">Pilih Satpam</option>
                 @foreach($satpamMalam as $id => $satpam)
@@ -59,7 +65,7 @@
         </div>
 
         <div class="transition duration-300 ease-in-out transform">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Titik Patroli</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Titik Patroli <span class="text-red-500">*</span></label>
             <div id="map" class="h-[300px] w-full rounded-2xl border border-gray-300 shadow-inner animate-fade-in"></div>
             <button type="button" id="addPoint" class="mt-3 inline-flex items-center bg-blue-600 hover:bg-blue-700 transition-all duration-300 transition-opacity text-white text-sm px-5 py-2 rounded-xl shadow-md">
                 <svg id="spinnerIcon" class="hidden w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -77,7 +83,7 @@
         </div>
 
         <div class="transition duration-300 ease-in-out transform">
-            <label for="interval_patroli" class="block text-sm font-medium text-gray-700 mb-2">Interval Patroli (Setiap ... Jam)</label>
+            <label for="interval_patroli" class="block text-sm font-medium text-gray-700 mb-2">Interval Patroli (Setiap ... Jam) <span class="text-red-500">*</span></label>
             <input type="number" name="interval_patroli" id="interval_patroli" min="1" class="w-full rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-3" placeholder="Contoh: 2">
             <small class="text-gray-500">Masukkan berapa jam sekali satpam melakukan patroli (misal: 2 berarti setiap 2 jam sekali).</small>
         </div>

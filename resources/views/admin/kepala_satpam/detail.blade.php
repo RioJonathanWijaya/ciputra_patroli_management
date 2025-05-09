@@ -1,8 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="space-y-6">
-    <!-- Header Info -->
+<div class="min-h-screen bg-gray-50 p-4 md:p-6">
+    <div class="relative overflow-auto sm:rounded-lg p-4">
+    <x-breadcrumbs :items="[
+                ['label' => 'Kepala Satpam', 'url' => route('admin.kepala_satpam.kepala_satpam')],
+                ['label' => 'Detail Kepala Satpam']
+            ]" />
     <div class="bg-white rounded-2xl shadow p-6 flex items-center justify-between">
         <div class="flex items-center gap-4">
             <img src="https://via.placeholder.com/80" class="rounded-full w-20 h-20 object-cover" alt="Satpam Photo">
@@ -18,7 +22,6 @@
 
     <div class="min-h-screen flex flex-col bg-gray-100 p-6">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Personal Info -->
             <div class="col-span-1 lg:col-span-2 bg-white rounded-2xl shadow p-6">
                 <h3 class="text-lg font-semibold text-gray-800 mb-5 border-b pb-2">Personal Information</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
@@ -49,7 +52,6 @@
                 </div>
             </div>
 
-            <!-- Patrol Assignment Info -->
             <div class="bg-white rounded-2xl shadow p-6">
                 <h3 class="text-lg font-semibold text-gray-800 mb-5 border-b pb-2">Patrol Assignment</h3>
                 <div class="space-y-3 text-sm text-gray-700">
@@ -72,7 +74,6 @@
                 </div>
             </div>
 
-            <!-- Account Info -->
             <div class="bg-white rounded-2xl shadow p-6">
                 <div class="flex items-center justify-between mb-5 border-b pb-2">
                     <h3 class="text-lg font-semibold text-gray-800">Account Information</h3>

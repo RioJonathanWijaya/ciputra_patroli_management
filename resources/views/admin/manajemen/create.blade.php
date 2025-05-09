@@ -32,9 +32,13 @@
 </div>
 @endif
 
-<div class="max-w-7xl mx-auto p-6 space-y-6">
+<div class="min-h-screen bg-gray-50 p-4 md:p-6">
+    <div class="relative overflow-auto sm:rounded-lg p-4">
+    <x-breadcrumbs :items="[
+        ['label' => 'Manajemen', 'url' => route('admin.manajemen.manajemen')],
+        ['label' => 'Tambah Manajemen']
+    ]" />
     <div class="text-3xl font-bold text-[#1C3A6B]">Tambah Manajemen</div>
-
     <form id="satpamForm" action="{{ route('admin.manajemen.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">

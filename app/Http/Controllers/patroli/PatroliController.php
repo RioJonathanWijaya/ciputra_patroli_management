@@ -66,6 +66,7 @@ class PatroliController extends Controller
             $result = [];
             foreach ($patroliData as $patroliId => $patroli) {
                 $lokasi = $lokasiData[$patroli['lokasiId']] ?? null;
+                $tanggal = $patroli['tanggal'] ?? '';
                 $namaLokasi = $lokasi ? $lokasi['nama_lokasi'] : 'Unknown Location';
                 $satpam = $satpamData[$patroli['satpamId']] ?? null;
                 $namaSatpam = $satpam ? $satpam['nama'] : 'Unknown Satpam';
@@ -73,6 +74,8 @@ class PatroliController extends Controller
                 $namaJadwal = $jadwal ? 'Jadwal ' . ($jadwal['shift'] ?? 'Unknown') : 'Unknown Jadwal';
                 $penugasan = $penugasanData[$patroli['penugasanId']] ?? null;
                 $namaPenugasan = $penugasan ? 'Penugasan ' . ($penugasan['shift'] ?? 'Unknown') : 'Unknown Penugasan';
+                
+                $formattedTanggal = Carbon::parse($tanggal)->format('d M Y');
 
                 $result[] = [
                     'id' => $patroliId,
@@ -85,15 +88,28 @@ class PatroliController extends Controller
                     'catatan_patroli' => $patroli['catatanPatroli'] ?? '',
                     'is_terlambat' => $patroli['isTerlambat'] ?? false,
                     'rute_patroli' => $patroli['rutePatroli'] ?? '',
+                    'tanggal' => $formattedTanggal,
                     'status' => $this->getStatus($patroli['durasiPatroli'] ?? 0, $patroli['isTerlambat'] ?? false)
                 ];
             }
 
             usort($result, function($a, $b) {
-                return strtotime($b['jam_mulai']) - strtotime($a['jam_mulai']);
+                $dateTimeA = strtotime($a['tanggal'] . ' ' . $a['jam_mulai']);
+                $dateTimeB = strtotime($b['tanggal'] . ' ' . $b['jam_mulai']);
+                return $dateTimeB - $dateTimeA;
             });
 
-            return view('admin.patroli.patroli', ['patroliData' => $result]);
+            $currentPage = request()->get('page', 1);
+            $perPage = 10;
+            $startItem = ($currentPage - 1) * $perPage;
+            $paginatedItems = array_slice($result, $startItem, $perPage);
+
+            return view('admin.patroli.patroli', [
+                'patroliData' => $result,
+                'paginatedItems' => $paginatedItems,
+                'currentPage' => $currentPage,
+                'startItem' => $startItem
+            ]);
 
         } catch (\Exception $e) {
             return view('admin.patroli.patroli', ['result' => []])
@@ -140,13 +156,11 @@ class PatroliController extends Controller
                     ->with('error', 'Patrol data not found.');
             }
 
-            // Get related data
             $lokasi = $this->lokasiRef->getChild($patroli['lokasiId'])->getValue();
             $satpam = $this->satpamRef->getChild($patroli['satpamId'])->getValue();
             $jadwal = $this->jadwalRef->getChild($patroli['jadwalPatroliId'])->getValue();
             $penugasan = $this->penugasanRef->getChild($patroli['penugasanId'])->getValue();
 
-            // Get checkpoint data
             $checkpoints = [];
             $checkpointSnapshot = $this->patroliCheckpointRef->getSnapshot();
             if ($checkpointSnapshot->exists()) {
@@ -158,7 +172,6 @@ class PatroliController extends Controller
                 }
             }
 
-            // Format the data for the view
             $patroliData = [
                 'id' => $id,
                 'nama_lokasi' => $lokasi['nama_lokasi'] ?? 'Unknown Location',
@@ -206,7 +219,6 @@ class PatroliController extends Controller
             ];
         }
 
-        // Sort checkpoints by timestamp if available
         usort($formatted, function($a, $b) {
             $timeA = isset($a['timestamp']) ? strtotime($a['timestamp']) : 0;
             $timeB = isset($b['timestamp']) ? strtotime($b['timestamp']) : 0;

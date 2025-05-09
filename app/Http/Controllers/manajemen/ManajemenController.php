@@ -27,7 +27,7 @@ class ManajemenController extends Controller
         $manajemenList = [];
         if ($manajemenData) {
             foreach ($manajemenData as $key => $manajemen) {
-                $manajemen[] = $manajemen;
+                $manajemenList[] = $manajemen;
             }
         }
     
@@ -106,7 +106,7 @@ public function detail($id)
         return abort(404, 'Manajemen not found.');
     }
 
-    return view('admin.manajemen.manajemen', ['manajemen' => $manajemenDetail]);
+    return view('admin.manajemen.detail', ['manajemen' => $manajemenDetail]);
 }
 
 public function create() {

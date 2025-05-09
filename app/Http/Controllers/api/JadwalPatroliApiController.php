@@ -12,6 +12,7 @@ class JadwalPatroliApiController extends Controller
     protected $lokasiRef;
     protected $satpamRef;
     protected $penugasanRef;
+    protected $patroliRef;
 
     public function __construct(Database $database)
     {
@@ -20,6 +21,7 @@ class JadwalPatroliApiController extends Controller
         $this->lokasiRef = $this->database->getReference('lokasi');
         $this->satpamRef = $this->database->getReference('satpam');
         $this->penugasanRef = $this->database->getReference('penugasan_patroli');
+        $this->patroliRef = $this->database->getReference('patroli');
     }
 
     public function getPenugasanByUID($uid)
@@ -66,5 +68,32 @@ class JadwalPatroliApiController extends Controller
         }
     
         return response()->json($result);
+    }
+
+    public function getStatsPatroliSatpam($uid)
+    {
+        $patroliData = $this->patroliRef->getValue() ?? [];
+
+        $stats = [
+            'total_patroli' => 0,
+            'total_late' => 0,
+            'total_completed' => 0,
+        ];
+
+        foreach ($patroliData as $key => $patroli) {
+            if (($patroli['satpamId'] ?? $patroli['satpam_id'] ?? null) == $uid) {
+                $stats['total_patroli']++;
+
+                if ($patroli['isTerlambat'] == true) {
+                    $stats['total_late']++;
+                }
+
+                if ($patroli['isTerlambat'] == false) {
+                    $stats['total_completed']++;
+                }
+            }
+        }
+
+        return response()->json($stats);
     }
 }

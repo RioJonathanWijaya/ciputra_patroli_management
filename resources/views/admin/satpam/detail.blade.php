@@ -1,10 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="space-y-6">
-    <div class="bg-white rounded-2xl shadow p-6 flex items-center justify-between">
-        <div class="flex items-center gap-4 w-full">
-            <div class="flex items-center gap-4 flex-1">
+<div class="min-h-screen bg-gray-50 p-4 md:p-6">
+    <div class="relative overflow-auto sm:rounded-lg p-4">
+        <x-breadcrumbs :items="[
+            ['label' => 'Satpam', 'url' => route('admin.satpam.satpam')],
+            ['label' => 'Detail Satpam']
+        ]" />
+        <div class="bg-white rounded-2xl shadow p-6 flex items-center justify-between">
+            <div class="flex items-center gap-4 w-full">
+                <div class="flex items-center gap-4 flex-1">
                 <div class="relative">
                     <img src="{{ $satpam['foto_profile'] ? $satpam['foto_profile'] : asset('images/default-profile.png') }}" 
                          class="rounded-full w-20 h-20 object-cover border-2 border-[#1C3A6B]" 
@@ -35,7 +40,7 @@
 
             <div class="text-sm text-right text-gray-500 whitespace-nowrap">
                 <p class="font-medium text-gray-600">Tanggal Bergabung</p>
-                <p class="text-gray-900">{{ $satpam['tanggal_bergabung'] ?? '-' }}</p>
+                <p class="text-gray-900">{{ $satpam['tanggal_bergabung'] ? \Carbon\Carbon::parse($satpam['tanggal_bergabung'])->format('d M Y') : '-' }}</p>
             </div>
         </div>
     </div>
@@ -59,7 +64,7 @@
                     </div>
                     <div>
                         <p class="font-medium text-gray-600">Date of Birth</p>
-                        <p class="text-gray-900">{{ $satpam['tanggal_lahir'] ?? '-' }}</p>
+                        <p class="text-gray-900">{{ $satpam['tanggal_lahir'] ? \Carbon\Carbon::parse($satpam['tanggal_lahir'])->format('d M Y') : '-' }}</p>
                     </div>
                     <div>
                         <p class="font-medium text-gray-600">Address</p>
@@ -139,6 +144,7 @@
                 @endif
             </div>
         </div>
+    </div>
     </div>
 </div>
 @endsection
