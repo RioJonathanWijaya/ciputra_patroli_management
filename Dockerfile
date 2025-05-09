@@ -24,7 +24,11 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy composer files first to leverage Docker cache
+# Copy artisan file first and set permissions
+COPY artisan .
+RUN chmod +x artisan
+
+# Copy composer files
 COPY composer.json composer.lock ./
 
 # Install dependencies with verbose output and memory limit
@@ -34,7 +38,7 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts --no-autoloader
 # Copy the rest of the application
 COPY . .
 
-# Make artisan executable and ensure proper permissions
+# Ensure artisan is still executable and has correct permissions
 RUN chmod +x artisan \
     && chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/storage \
